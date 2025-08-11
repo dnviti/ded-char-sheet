@@ -3,7 +3,7 @@ import asyncio
 import os
 from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
-
+from datetime import datetime, timezone
 # Load environment variables from .env file
 load_dotenv()
 
@@ -65,6 +65,16 @@ async def main():
         print(f"Error connecting to MongoDB: {e}")
         return
 
+    # Check if data has already been cached today
+    cache_log_collection = db["cache_log"]
+    today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    log_entry = await cache_log_collection.find_one({"date": today_str, "status": "success"})
+
+    if log_entry:
+        print(f"Open5E data has already been successfully cached today ({today_str}). Skipping.")
+        client.close()
+        return
+
     for endpoint in ENDPOINTS_TO_CACHE:
         collection_name = f"open5e_{endpoint}"
         print(f"\nProcessing endpoint: '{endpoint}' -> Collection: '{collection_name}'")
@@ -93,9 +103,16 @@ async def main():
         await collection.insert_many(data)
         print(f"Successfully cached data for '{endpoint}'.")
 
+    # Log the successful cache event
+    await cache_log_collection.insert_one({
+        "date": today_str,
+        "status": "success",
+        "cached_at": datetime.now(timezone.utc)
+    })
+    print(f"\nData caching process complete. Logged success for {today_str}.")
+
     # Close the database connection
     client.close()
-    print("\nData caching process complete. All specified endpoints have been updated.")
 
 if __name__ == "__main__":
     # This allows running the script directly
