@@ -49,82 +49,265 @@ const SAVING_THROW_NAMES = {
     intelligence: "Intelligence", wisdom: "Wisdom", charisma: "Charisma",
 };
 
-function App() {
-    const [characters, setCharacters] = useState([]);
-    const [selectedCharacterId, setSelectedCharacterId] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [apiKey, setApiKey] = useState("");
+const AuthForm = ({ onLogin, onRegister }) => {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [isRegister, setIsRegister] = useState(false);
+    const [error, setError] = useState("");
 
-    useEffect(() => {
-        const fetchApiKey = async () => {
-            try {
-                const response = await fetch('/api/gemini-key');
-                if (!response.ok) throw new Error("Could not fetch API key");
-                const data = await response.json();
-                setApiKey(data.apiKey);
-            } catch (error) {
-                console.error("Failed to fetch Gemini API key:", error);
-                alert("Failed to fetch Gemini API key. Make sure it's configured on the server.");
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError("");
+        try {
+            if (isRegister) {
+                await onRegister(email, password);
+            } else {
+                await onLogin(email, password);
             }
-        };
-        fetchApiKey();
-    }, []);
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white">
+            <div className="p-8 bg-gray-800 rounded-lg shadow-lg w-full max-w-sm">
+                <h2 className="text-2xl font-serif text-center mb-6">{isRegister ? "Create an Account" : "Welcome Back"}</h2>
+                {error && <p className="bg-red-500/50 text-white p-3 rounded mb-4">{error}</p>}
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block mb-1 font-sans">Email</label>
+                        <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="hero@example.com" required className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500"/>
+                    </div>
+                    <div>
+                        <label className="block mb-1 font-sans">Password</label>
+                        <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500"/>
+                    </div>
+                    <button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-300">
+                        {isRegister ? "Register" : "Login"}
+                    </button>
+                </form>
+                <button onClick={() => { setIsRegister(!isRegister); setError(""); }} className="w-full mt-4 text-center text-sm text-gray-400 hover:text-white">
+                    {isRegister ? "Already have an account? Login" : "Need an account? Register"}
+                </button>
+            </div>
+        </div>
+    );
+};
+
+const AdminDashboard = () => {
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
     useEffect(() => {
-        const fetchCharacters = async () => {
+        const fetchUsers = async () => {
             try {
                 setLoading(true);
-                const response = await fetch('/api/characters');
-                if (!response.ok) throw new Error("Network response was not ok");
+                const response = await fetch('/api/admin/users');
+                if (!response.ok) {
+                    throw new Error("Failed to fetch users. Are you an admin?");
+                }
                 const data = await response.json();
-                setCharacters(data);
-            } catch (error) {
-                console.error("Failed to fetch characters:", error);
-                alert("Failed to load characters from the database.");
+                setUsers(data);
+            } catch (err) {
+                setError(err.message);
             } finally {
                 setLoading(false);
             }
         };
-        fetchCharacters();
+        fetchUsers();
     }, []);
 
-    const callGeminiAPI = async (prompt, jsonSchema = null) => {
-        if (!apiKey) {
-            alert("Gemini API key is not available.");
-            return null;
-        }
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
-        const payload = { contents: [{ parts: [{ text: prompt }] }], ...(jsonSchema && { generationConfig: { responseMimeType: "application/json", responseSchema: jsonSchema } }) };
+    const handlePackageChange = async (userId, newPackage) => {
         try {
-            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            if (!response.ok) { const errorBody = await response.text(); throw new Error(`API Error: ${response.status} ${response.statusText}\n${errorBody}`); }
+            const response = await fetch(`/api/admin/users/${userId}/package`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ package: newPackage })
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || "Failed to update package.");
+            }
+            const updatedUser = await response.json();
+            setUsers(users.map(u => u.id === userId ? updatedUser : u));
+        } catch (err) {
+            alert(err.message);
+        }
+    };
+
+    if (loading) return <p className="text-white text-center">Loading users...</p>;
+    if (error) return <p className="text-red-500 text-center">Error: {error}</p>;
+
+    return (
+        <div className="bg-gray-800 p-6 rounded-lg shadow-lg mt-6">
+            <h2 className="text-2xl font-serif mb-4 text-white">Admin Dashboard</h2>
+            <div className="overflow-x-auto">
+                <table className="w-full text-left text-gray-300">
+                    <thead className="bg-gray-700">
+                        <tr>
+                            <th className="p-3">Email</th>
+                            <th className="p-3">Package</th>
+                            <th className="p-3">Generations Used</th>
+                            <th className="p-3">Set Package</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {users.map(user => (
+                            <tr key={user.id} className="border-b border-gray-700 hover:bg-gray-600">
+                                <td className="p-3">{user.email}</td>
+                                <td className="p-3">{user.package}</td>
+                                <td className="p-3">{user.generation_count}</td>
+                                <td className="p-3">
+                                    <select
+                                        value={user.package}
+                                        onChange={(e) => handlePackageChange(user.id, e.target.value)}
+                                        className="bg-gray-900 text-white p-2 rounded"
+                                    >
+                                        <option value="free">free</option>
+                                        <option value="premium">premium</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
+
+function App() {
+    const [characters, setCharacters] = useState([]);
+    const [selectedCharacterId, setSelectedCharacterId] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [currentUser, setCurrentUser] = useState(null);
+    const [authChecked, setAuthChecked] = useState(false);
+
+    useEffect(() => {
+        const fetchCurrentUser = async () => {
+            try {
+                const response = await fetch('/users/me');
+                if (response.ok) {
+                    const user = await response.json();
+                    setCurrentUser(user);
+                }
+            } catch (error) {
+                console.error("Error fetching current user", error);
+            } finally {
+                setAuthChecked(true);
+            }
+        };
+        fetchCurrentUser();
+    }, []);
+
+    useEffect(() => {
+        if (!currentUser) {
+            setCharacters([]);
+            return;
+        }
+
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const charsResponse = await fetch('/api/characters');
+
+                if (charsResponse.status === 401) {
+                    setCurrentUser(null); // Token is invalid, log out
+                    return;
+                }
+
+                if (!charsResponse.ok) throw new Error("Could not fetch characters");
+                const charsData = await charsResponse.json();
+                setCharacters(charsData);
+            } catch (error) {
+                console.error("Failed to fetch user data:", error);
+                setCurrentUser(null); // Log out on error
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [currentUser]);
+
+    const handleLogin = async (email, password) => {
+        const response = await fetch('/auth/jwt/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ username: email, password: password })
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || "Login failed");
+        }
+        const userResponse = await fetch('/users/me');
+        const user = await userResponse.json();
+        setCurrentUser(user);
+    };
+
+    const handleRegister = async (email, password) => {
+        const response = await fetch('/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            const message = Array.isArray(errorData.detail) ? errorData.detail[0].msg : errorData.detail;
+            throw new Error(message || "Registration failed");
+        }
+        await handleLogin(email, password);
+    };
+
+    const handleLogout = async () => {
+        await fetch('/auth/jwt/logout', { method: 'POST' });
+        setCurrentUser(null);
+        setSelectedCharacterId(null);
+    };
+
+    const callGeminiAPI = async (prompt, jsonSchema = null) => {
+        const payload = { prompt, json_schema: jsonSchema, is_image: false };
+        try {
+            const response = await fetch("/api/gemini/proxy", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                const errorBody = await response.json();
+                throw new Error(errorBody.detail || `API Error: ${response.status}`);
+            }
             const result = await response.json();
             const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
             if (!text) { throw new Error("Invalid or empty API response."); }
             return text;
         } catch (error) {
-            console.error("Error calling Gemini API:", error);
+            console.error("Error calling Gemini proxy:", error);
             alert(`An error occurred while generating text: ${error.message}`);
             return null;
         }
     };
 
     const callImagenAPI = async (prompt) => {
-        if (!apiKey) {
-            alert("Imagen API key is not available.");
-            return null;
-        }
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
-        const payload = { instances: [{ prompt: prompt }], parameters: { "sampleCount": 1 } };
+        const payload = { prompt, is_image: true };
         try {
-            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            if (!response.ok) { const errorBody = await response.text(); throw new Error(`API Error: ${response.status} ${response.statusText}\n${errorBody}`); }
+            const response = await fetch("/api/gemini/proxy", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                const errorBody = await response.json();
+                throw new Error(errorBody.detail || `API Error: ${response.status}`);
+            }
             const result = await response.json();
             const base64Data = result?.predictions?.[0]?.bytesBase64Encoded;
             if (!base64Data) { throw new Error("Invalid or empty API response for image."); }
             return `data:image/png;base64,${base64Data}`;
         } catch (error) {
-            console.error("Error calling Imagen API:", error);
+            console.error("Error calling Imagen proxy:", error);
             alert(`An error occurred while generating the image: ${error.message}`);
             return null;
         }
@@ -138,22 +321,21 @@ function App() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newChar),
             });
-            if (!response.ok) throw new Error('Failed to create character');
+            if (!response.ok) {
+                 const errorData = await response.json();
+                 alert(`Failed to create character: ${errorData.detail}`);
+                 throw new Error(errorData.detail);
+            }
             const savedChar = await response.json();
             setCharacters(prev => [...prev, savedChar]);
             setSelectedCharacterId(savedChar.id);
         } catch (error) {
             console.error("Failed to create character:", error);
-            alert("Failed to save new character to the database.");
         }
     };
 
     const handleFullGenerateCharacter = async (concept) => {
         console.log("Generating character with concept:", concept);
-        if (!apiKey) {
-            alert("API Key not configured. Full generation is not available.");
-            return;
-        }
 
         const schema = {
             type: "OBJECT",
@@ -212,8 +394,9 @@ function App() {
             });
 
             if (!response.ok) {
-                const errorBody = await response.text();
-                throw new Error(`Failed to save character: ${errorBody}`);
+                const errorBody = await response.json();
+                alert(`Failed to save character: ${errorBody.detail}`);
+                throw new Error(`Failed to save character: ${errorBody.detail}`);
             }
 
             const savedChar = await response.json();
@@ -222,7 +405,6 @@ function App() {
 
         } catch (error) {
             console.error("Full character generation failed:", error);
-            alert(`An error occurred during full character generation: ${error.message}`);
         }
     };
 
@@ -236,7 +418,8 @@ function App() {
                 body: JSON.stringify(updatedCharacter),
             });
             if (!response.ok) throw new Error('Failed to update character');
-            setCharacters(prev => prev.map(char => char.id === updatedCharacter.id ? updatedCharacter : char));
+            const updatedFromServer = await response.json();
+            setCharacters(prev => prev.map(char => char.id === updatedFromServer.id ? updatedFromServer : char));
         } catch (error) {
             console.error("Failed to update character:", error);
             // Optionally revert state or notify user
@@ -260,14 +443,34 @@ function App() {
     const handleBackToSelector = () => { setSelectedCharacterId(null); };
     const selectedCharacter = characters.find(c => c.id === selectedCharacterId);
 
+    if (!authChecked) {
+        return <div className="min-h-screen flex items-center justify-center text-xl font-serif bg-gray-900 text-white">Checking session...</div>;
+    }
+
     return (
         <main>
-            {loading ? (
-                <div className="min-h-screen flex items-center justify-center text-xl font-serif">Loading Heroes...</div>
-            ) : !selectedCharacter ? (
-                <CharacterSelector characters={characters} onSelect={handleSelectCharacter} onCreate={handleCreateCharacter} onDelete={handleDeleteCharacter} onFullGenerate={handleFullGenerateCharacter} />
+            {currentUser ? (
+                <>
+                    <header className="bg-gray-800 text-white p-4 flex justify-between items-center shadow-md">
+                        <h1 className="text-xl font-serif">D&D Character Keep</h1>
+                        <div className="flex items-center">
+                            <span className="mr-4">{currentUser.email}</span>
+                            <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-300">Logout</button>
+                        </div>
+                    </header>
+                    <div className="p-4">
+                    {currentUser.is_superuser && <AdminDashboard />}
+                    {loading ? (
+                        <div className="flex items-center justify-center text-xl font-serif mt-10">Loading Heroes...</div>
+                    ) : !selectedCharacter ? (
+                        <CharacterSelector characters={characters} onSelect={handleSelectCharacter} onCreate={handleCreateCharacter} onDelete={handleDeleteCharacter} onFullGenerate={handleFullGenerateCharacter} />
+                    ) : (
+                        <CharacterSheet character={selectedCharacter} onUpdate={handleUpdateCharacter} onBack={handleBackToSelector} callGeminiAPI={callGeminiAPI} callImagenAPI={callImagenAPI} />
+                    )}
+                    </div>
+                </>
             ) : (
-                <CharacterSheet character={selectedCharacter} onUpdate={handleUpdateCharacter} onBack={handleBackToSelector} />
+                <AuthForm onLogin={handleLogin} onRegister={handleRegister} />
             )}
         </main>
     );

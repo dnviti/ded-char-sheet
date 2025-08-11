@@ -5,3 +5,6 @@ motor
 python-dotenv
 requests
 APScheduler
+fastapi-users[beanie]
+email_validator
+httpx
