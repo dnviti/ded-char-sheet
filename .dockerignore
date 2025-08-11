@@ -1,0 +1,19 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Database
+test.db
+
+# Env
+.env
+
+# Docker
+Dockerfile
+.dockerignore
