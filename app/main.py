@@ -26,8 +26,7 @@ async def get_characters():
     characters_collection = get_collection_characters()
     characters = await characters_collection.find().to_list(1000)
     for char in characters:
-        if '_id' in char and 'id' not in char:
-            char['id'] = str(char['_id'])
+        char["_id"] = str(char["_id"])
     return characters
 
 @app.get("/api/characters/{character_id}")
@@ -36,6 +35,7 @@ async def get_character(character_id: str):
     character = await characters_collection.find_one({"id": character_id})
     if character is None:
         raise HTTPException(status_code=404, detail="Character not found")
+    character["_id"] = str(character["_id"])
     return character
 
 @app.post("/api/characters", status_code=201)
