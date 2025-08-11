@@ -16,18 +16,21 @@ from .users import User, get_user_db, UserRead, UserCreate, UserUpdate
 from scripts.load_open5e_data import main as cache_open5e_data_main
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from fastapi_users import FastAPIUsers, BaseUserManager, UUIDIDMixin
+from fastapi_users import FastAPIUsers, BaseUserManager
 from fastapi_users.authentication import (
     AuthenticationBackend,
     CookieTransport,
     JWTStrategy,
 )
-from fastapi_users.db import BeanieUserDatabase
+from fastapi_users.db import BeanieUserDatabase, ObjectIDIDMixin
+from beanie import PydanticObjectId
 
 SECRET = os.getenv("SECRET")
+if SECRET is None:
+    raise ValueError("SECRET environment variable is not set")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
+class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
     reset_password_token_secret = SECRET
     verification_token_secret = SECRET
 
@@ -45,7 +48,7 @@ auth_backend = AuthenticationBackend(
     get_strategy=get_jwt_strategy,
 )
 
-fastapi_users = FastAPIUsers[User, uuid.UUID](get_user_manager, [auth_backend])
+fastapi_users = FastAPIUsers[User, PydanticObjectId](get_user_manager, [auth_backend])
 
 current_user = fastapi_users.current_user(active=True)
 admin_user = fastapi_users.current_user(active=True, superuser=True)
@@ -262,7 +265,7 @@ async def get_all_users(user: User = Depends(admin_user)):
     return users
 
 @app.patch("/api/admin/users/{user_id}/package", response_model=UserRead)
-async def update_user_package(user_id: uuid.UUID, update: UserPackageUpdate, user: User = Depends(admin_user)):
+async def update_user_package(user_id: PydanticObjectId, update: UserPackageUpdate, user: User = Depends(admin_user)):
     user_to_update = await User.get(user_id)
     if not user_to_update:
         raise HTTPException(status_code=404, detail="User not found")
