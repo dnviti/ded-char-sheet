@@ -10,12 +10,11 @@ DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./test.db")
 database = Database(DATABASE_URL)
 metadata = sqlalchemy.MetaData()
 
-notes = sqlalchemy.Table(
-    "notes",
+characters = sqlalchemy.Table(
+    "characters",
     metadata,
-    sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
-    sqlalchemy.Column("text", sqlalchemy.String(length=255)),
-    sqlalchemy.Column("completed", sqlalchemy.Boolean),
+    sqlalchemy.Column("id", sqlalchemy.String(36), primary_key=True),
+    sqlalchemy.Column("data", sqlalchemy.JSON),
 )
 
 engine = sqlalchemy.create_engine(
