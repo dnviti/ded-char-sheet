@@ -29,27 +29,27 @@ const SheetHeader = ({
                 <div className="flex flex-col">
                     <label className="font-bold text-accent-gold uppercase tracking-wider text-xs">Class & Level</label>
                     <SearchableSelect
-                        endpoint="/api/open5e/classes"
+                        resourceType="classes"
                         value={classLevel}
-                        onChange={(item) => onSelectAPI('classes', item)}
+                        onSelect={(item) => onSelectAPI('classes', item)}
                         placeholder="Select Class"
                     />
                 </div>
                 <div className="flex flex-col">
                     <label className="font-bold text-accent-gold uppercase tracking-wider text-xs">Race</label>
                      <SearchableSelect
-                        endpoint="/api/open5e/species"
+                        resourceType="species"
                         value={race}
-                        onChange={(item) => onSelectAPI('species', item)}
+                        onSelect={(item) => onSelectAPI('species', item)}
                         placeholder="Select Race"
                     />
                 </div>
                 <div className="flex flex-col">
                     <label className="font-bold text-accent-gold uppercase tracking-wider text-xs">Background</label>
                     <SearchableSelect
-                        endpoint="/api/open5e/backgrounds"
+                        resourceType="backgrounds"
                         value={background}
-                        onChange={(item) => onSelectAPI('backgrounds', item)}
+                        onSelect={(item) => onSelectAPI('backgrounds', item)}
                         placeholder="Select Background"
                     />
                 </div>
@@ -184,7 +184,7 @@ const Equipment = ({ equipment, currency, onUpdate, onAddItem }) => {
         onUpdate(`currency.${key}`, parseInt(value) || 0);
     };
     return (
-        <ThemedSection title="Equipment" actions={<SearchableSelect endpoint="/api/open5e/equipment" onChange={onAddItem} placeholder="Add Item..." />}>
+        <ThemedSection title="Equipment" actions={<SearchableSelect resourceType="equipment" onSelect={onAddItem} placeholder="Add Item..." />}>
             <div className="grid grid-cols-5 gap-2 mb-4">
                  {Object.entries(currency).map(([key, value]) => (
                     <div key={key} className="flex flex-col items-center">
@@ -264,7 +264,7 @@ const Spells = ({ spellcasting, abilityScores, proficiencyBonus, onUpdate, onAdd
     const spellAttackBonus = proficiencyBonus + spellcastingAbilityModifier;
 
     return (
-        <ThemedSection title="Spellcasting" actions={<SearchableSelect endpoint="/api/open5e/spells" onChange={onAddSpell} placeholder="Add Spell..." />}>
+        <ThemedSection title="Spellcasting" actions={<SearchableSelect resourceType="spells" onSelect={onAddSpell} placeholder="Add Spell..." />}>
             <div className="grid grid-cols-3 gap-4 text-center mb-4">
                 <ThemedStatBox label="Spellcasting Ability" value={ability.toUpperCase()} />
                 <ThemedStatBox label="Spell Save DC" value={spellSaveDC} />
