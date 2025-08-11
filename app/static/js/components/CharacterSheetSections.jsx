@@ -7,7 +7,7 @@ const { useState, useEffect, useCallback, useRef } = React;
 // getModifier, SKILL_NAMES, SAVING_THROW_NAMES
 
 const SheetHeader = ({
-    name, classLevel, race, background, alignment, playerName, experience,
+    name, className, level, race, background, alignment, playerName, experience,
     onBack, onUpdate, onSelectAPI
 }) => {
     return (
@@ -27,13 +27,17 @@ const SheetHeader = ({
 
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-3 mt-4 text-sm">
                 <div className="flex flex-col">
-                    <label className="font-bold text-accent-gold uppercase tracking-wider text-xs">Class & Level</label>
+                    <label className="font-bold text-accent-gold uppercase tracking-wider text-xs">Class</label>
                     <SearchableSelect
                         resourceType="classes"
-                        value={classLevel}
+                        value={className}
                         onSelect={(item) => onSelectAPI('classes', item)}
                         placeholder="Select Class"
                     />
+                </div>
+                <div className="flex flex-col">
+                    <label className="font-bold text-accent-gold uppercase tracking-wider text-xs">Level</label>
+                    <input type="number" value={level} onChange={(e) => onUpdate('level', parseInt(e.target.value) || 0)} className="theme-dnd-input" />
                 </div>
                 <div className="flex flex-col">
                     <label className="font-bold text-accent-gold uppercase tracking-wider text-xs">Race</label>
