@@ -1,0 +1,25 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGODB_URL=mongodb://mongo:27017
+      - MONGO_INITDB_DATABASE=dedchar
+    depends_on:
+      - mongo
+    volumes:
+      - ./app:/app/app
+      - ./scripts:/app/scripts
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=dedchar
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
