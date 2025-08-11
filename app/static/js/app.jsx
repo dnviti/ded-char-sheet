@@ -5,21 +5,21 @@ const getModifier = (score) => Math.floor((score - 10) / 2);
 
 const createNewCharacter = () => ({
   id: crypto.randomUUID(),
-  name: "Nuovo Eroe", classLevel: "Guerriero 1", race: "Umano", background: "Accolito", alignment: "Legale Buono",
+  name: "New Hero", classLevel: "Fighter 1", race: "Human", background: "Acolyte", alignment: "Lawful Good",
   playerName: "", experience: 0,
   abilityScores: { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
   inspiration: 0, proficiencyBonus: 2,
   savingThrows: { strength: { proficient: false }, dexterity: { proficient: false }, constitution: { proficient: false }, intelligence: { proficient: false }, wisdom: { proficient: false }, charisma: { proficient: false } },
   skills: { acrobatics: { proficient: false }, animalHandling: { proficient: false }, arcana: { proficient: false }, athletics: { proficient: false }, deception: { proficient: false }, history: { proficient: false }, insight: { proficient: false }, intimidation: { proficient: false }, investigation: { proficient: false }, medicine: { proficient: false }, nature: { proficient: false }, perception: { proficient:false }, performance: { proficient: false }, persuasion: { proficient: false }, religion: { proficient: false }, sleightOfHand: { proficient: false }, stealth: { proficient: false }, survival: { proficient: false } },
-  armorClass: 10, initiative: 0, speed: "9m", maxHp: 10, currentHp: 10, tempHp: 0,
+  armorClass: 10, initiative: 0, speed: "30ft", maxHp: 10, currentHp: 10, tempHp: 0,
   hitDice: { total: "1d10", remaining: 1 },
   deathSaves: { successes: 0, failures: 0 },
-  attacks: [{ name: "Spada Lunga", bonus: "+3", damage: "1d8+1 tagliente" }],
-  equipment: "Zaino, sacco a pelo, 10 torce...",
+  attacks: [{ name: "Longsword", bonus: "+3", damage: "1d8+1 slashing" }],
+  equipment: "Backpack, bedroll, 10 torches...",
   currency: { cp: 0, sp: 0, ep: 0, gp: 15, pp: 0 },
   personalityTraits: "", ideals: "", bonds: "", flaws: "",
-  features: "Stile di Combattimento, Secondo Vento",
-  proficienciesAndLanguages: "Armature leggere, medie, pesanti, scudi, armi semplici, da guerra. Comune, Elfico.",
+  features: "Fighting Style, Second Wind",
+  proficienciesAndLanguages: "Light, medium, heavy armor, shields, simple and martial weapons. Common, Elvish.",
   appearance: "", imageUrl: "", adventureHook: "",
   spellcasting: {
       ability: 'intelligence',
@@ -33,20 +33,20 @@ const createNewCharacter = () => ({
 });
 
 const SKILL_NAMES = {
-    acrobatics: { name: "Acrobazia", ability: "dexterity" }, animalHandling: { name: "Addestrare Animali", ability: "wisdom" },
-    arcana: { name: "Arcano", ability: "intelligence" }, athletics: { name: "Atletica", ability: "strength" },
-    deception: { name: "Inganno", ability: "charisma" }, history: { name: "Storia", ability: "intelligence" },
-    insight: { name: "Intuizione", ability: "wisdom" }, intimidation: { name: "Intimidire", ability: "charisma" },
-    investigation: { name: "Investigare", ability: "intelligence" }, medicine: { name: "Medicina", ability: "wisdom" },
-    nature: { name: "Natura", ability: "intelligence" }, perception: { name: "Percezione", ability: "wisdom" },
-    performance: { name: "Intrattenere", ability: "charisma" }, persuasion: { name: "Persuasione", ability: "charisma" },
-    religion: { name: "Religione", ability: "intelligence" }, sleightOfHand: { name: "Rapidità di Mano", ability: "dexterity" },
-    stealth: { name: "Furtività", ability: "dexterity" }, survival: { name: "Sopravvivenza", ability: "wisdom" },
+    acrobatics: { name: "Acrobatics", ability: "dexterity" }, animalHandling: { name: "Animal Handling", ability: "wisdom" },
+    arcana: { name: "Arcana", ability: "intelligence" }, athletics: { name: "Athletics", ability: "strength" },
+    deception: { name: "Deception", ability: "charisma" }, history: { name: "History", ability: "intelligence" },
+    insight: { name: "Insight", ability: "wisdom" }, intimidation: { name: "Intimidation", ability: "charisma" },
+    investigation: { name: "Investigation", ability: "intelligence" }, medicine: { name: "Medicine", ability: "wisdom" },
+    nature: { name: "Nature", ability: "intelligence" }, perception: { name: "Perception", ability: "wisdom" },
+    performance: { name: "Performance", ability: "charisma" }, persuasion: { name: "Persuasion", ability: "charisma" },
+    religion: { name: "Religion", ability: "intelligence" }, sleightOfHand: { name: "Sleight of Hand", ability: "dexterity" },
+    stealth: { name: "Stealth", ability: "dexterity" }, survival: { name: "Survival", ability: "wisdom" },
 };
 
 const SAVING_THROW_NAMES = {
-    strength: "Forza", dexterity: "Destrezza", constitution: "Costituzione",
-    intelligence: "Intelligenza", wisdom: "Saggezza", charisma: "Carisma",
+    strength: "Strength", dexterity: "Dexterity", constitution: "Constitution",
+    intelligence: "Intelligence", wisdom: "Wisdom", charisma: "Charisma",
 };
 
 function App() {
@@ -104,7 +104,7 @@ function App() {
         //     setCharacters(prev => [...prev, savedChar]);
         //     setSelectedCharacterId(savedChar.id);
         // } catch (error) { ... }
-        alert("La generazione completa del personaggio tramite IA deve essere ricollegata al backend.");
+        alert("Full AI character generation needs to be reconnected to the backend.");
     };
 
     const handleSelectCharacter = (id) => { setSelectedCharacterId(id); };
@@ -125,7 +125,7 @@ function App() {
     }, []);
 
     const handleDeleteCharacter = async (id) => {
-        if (window.confirm("Sei sicuro di voler eliminare questo personaggio? L'azione è irreversibile.")) {
+        if (window.confirm("Are you sure you want to delete this character? This action is irreversible.")) {
             try {
                 const response = await fetch(`/api/characters/${id}`, { method: 'DELETE' });
                 if (!response.ok) throw new Error('Failed to delete character');
@@ -144,7 +144,7 @@ function App() {
     return (
         <main>
             {loading ? (
-                <div className="min-h-screen flex items-center justify-center text-xl font-serif">Caricamento Eroi...</div>
+                <div className="min-h-screen flex items-center justify-center text-xl font-serif">Loading Heroes...</div>
             ) : !selectedCharacter ? (
                 <CharacterSelector characters={characters} onSelect={handleSelectCharacter} onCreate={handleCreateCharacter} onDelete={handleDeleteCharacter} onFullGenerate={handleFullGenerateCharacter} />
             ) : (

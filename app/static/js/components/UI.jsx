@@ -60,13 +60,13 @@ const DeathSaveTracker = ({ successes, failures, onUpdate }) => {
     return (
         <div className="flex justify-between items-center mt-2">
             <div className="flex items-center space-x-2">
-                <span className="font-bold text-sm">Successi</span>
+                <span className="font-bold text-sm">Successes</span>
                 {[...Array(3)].map((_, i) => (
                     <input key={`s-${i}`} type="checkbox" checked={i < successes} onChange={() => handleToggle('successes', i)} className="form-checkbox h-5 w-5 text-green-600 rounded-full"/>
                 ))}
             </div>
             <div className="flex items-center space-x-2">
-                <span className="font-bold text-sm">Fallimenti</span>
+                <span className="font-bold text-sm">Failures</span>
                 {[...Array(3)].map((_, i) => (
                     <input key={`f-${i}`} type="checkbox" checked={i < failures} onChange={() => handleToggle('failures', i)} className="form-checkbox h-5 w-5 text-red-600 rounded-full"/>
                 ))}
@@ -109,10 +109,10 @@ const SpellLevel = ({ level, data, onUpdateCantrips, onUpdateLevel }) => {
     };
 
     return (
-        <Section title={isCantrip ? "Trucchetti" : `Incantesimi di Livello ${level}`}>
+        <Section title={isCantrip ? "Cantrips" : `Level ${level} Spells`}>
             {!isCantrip && (
                 <div className="flex items-center gap-4 mb-4">
-                    <label className="font-bold">Slot</label>
+                    <label className="font-bold">Slots</label>
                     <input type="number" min="0" value={data.slotsExpended} onChange={e => onUpdateLevel('slotsExpended', parseInt(e.target.value) || 0)} className="w-16 p-1 text-center border rounded"/>
                     <span>/</span>
                     <input type="number" min="0" value={data.slotsTotal} onChange={e => onUpdateLevel('slotsTotal', parseInt(e.target.value) || 0)} className="w-16 p-1 text-center border rounded"/>
@@ -123,12 +123,12 @@ const SpellLevel = ({ level, data, onUpdateCantrips, onUpdateLevel }) => {
                     <li key={index} className="flex items-center gap-2">
                         {!isCantrip && <input type="checkbox" checked={spell.prepared} onChange={() => handleTogglePrepared(index)} className="form-checkbox h-5 w-5 text-red-800 rounded"/>}
                         <span className="flex-grow">{spell.name}</span>
-                        <button onClick={() => handleRemoveSpell(index)} className="text-red-500 hover:text-red-800 text-xs">Rimuovi</button>
+                        <button onClick={() => handleRemoveSpell(index)} className="text-red-500 hover:text-red-800 text-xs">Remove</button>
                     </li>
                 ))}
             </ul>
             <div className="flex gap-2 mt-4">
-                <input type="text" value={newSpell} onChange={e => setNewSpell(e.target.value)} placeholder="Nuovo incantesimo" className="flex-grow p-1 border rounded" />
+                <input type="text" value={newSpell} onChange={e => setNewSpell(e.target.value)} placeholder="New spell" className="flex-grow p-1 border rounded" />
                 <button onClick={handleAddSpell} className="px-3 py-1 bg-red-800 text-white rounded hover:bg-red-900">+</button>
             </div>
         </Section>
