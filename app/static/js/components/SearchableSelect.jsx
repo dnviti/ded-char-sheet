@@ -63,7 +63,7 @@ const SearchableSelect = ({ resourceType, value, onSelect, placeholder }) => {
     };
 
     return (
-        <div className={`relative ${isOpen ? 'z-20' : ''}`} ref={wrapperRef}>
+        <div className="relative" ref={wrapperRef}>
             <input
                 type="text"
                 value={searchTerm || value}
@@ -76,7 +76,7 @@ const SearchableSelect = ({ resourceType, value, onSelect, placeholder }) => {
                 className="w-full bg-transparent focus:outline-none focus:bg-white/20 rounded-md p-1"
             />
             {isOpen && (
-                <ul className="absolute z-10 w-full bg-white border border-stone-300 rounded-md mt-1 max-h-60 overflow-y-auto shadow-lg">
+                <ul className="absolute z-10 w-full bg-white border border-stone-300 rounded-md mt-1 max-h-60 overflow-y-auto shadow-lg z-10">
                     {results.length > 0 ? (
                         results.map((item) => (
                             <li
