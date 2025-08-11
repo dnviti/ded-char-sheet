@@ -11,24 +11,36 @@ from pydantic import BaseModel
 from typing import Optional, Dict, Any
 
 from .db import connect_to_mongo, close_mongo_connection, get_collection_characters, get_collection_open5e, get_database, get_collection_gemini_usage
-from .users import User, get_user_db
+from .users import User, get_user_db, UserRead, UserCreate, UserUpdate
 
 from scripts.load_open5e_data import main as cache_open5e_data_main
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from fastapi_users import FastAPIUsers
-from fastapi_users.authentication import JWTStrategy, AuthenticationBackend, CookieTransport
-from fastapi_users.schemas import UserRead, UserCreate, UserUpdate
+from fastapi_users import FastAPIUsers, BaseUserManager
+from fastapi_users.authentication import (
+    AuthenticationBackend,
+    CookieTransport,
+    JWTStrategy,
+)
+from fastapi_users.db import BeanieUserDatabase, ObjectIDIDMixin
+from beanie import PydanticObjectId
+from fastapi.encoders import ENCODERS_BY_TYPE
+from bson import ObjectId
 
 SECRET = os.getenv("SECRET")
+if SECRET is None:
+    raise ValueError("SECRET environment variable is not set")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-app = FastAPI()
+ENCODERS_BY_TYPE[PydanticObjectId] = str
+ENCODERS_BY_TYPE[ObjectId] = str
 
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-templates = Jinja2Templates(directory="app/templates")
+class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
+    reset_password_token_secret = SECRET
+    verification_token_secret = SECRET
 
-scheduler = AsyncIOScheduler()
+async def get_user_manager(user_db: BeanieUserDatabase = Depends(get_user_db)):
+    yield UserManager(user_db)
 
 cookie_transport = CookieTransport(cookie_name="dnd_token", cookie_max_age=3600)
 
@@ -41,13 +53,17 @@ auth_backend = AuthenticationBackend(
     get_strategy=get_jwt_strategy,
 )
 
-fastapi_users = FastAPIUsers[User, uuid.UUID](
-    get_user_db,
-    [auth_backend],
-)
+fastapi_users = FastAPIUsers[User, PydanticObjectId](get_user_manager, [auth_backend])
 
-current_user = fastapi_users.current_user()
+current_user = fastapi_users.current_user(active=True)
 admin_user = fastapi_users.current_user(active=True, superuser=True)
+
+app = FastAPI()
+
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+templates = Jinja2Templates(directory="app/templates")
+
+scheduler = AsyncIOScheduler()
 
 class UserPackageUpdate(BaseModel):
     package: str
@@ -254,7 +270,7 @@ async def get_all_users(user: User = Depends(admin_user)):
     return users
 
 @app.patch("/api/admin/users/{user_id}/package", response_model=UserRead)
-async def update_user_package(user_id: uuid.UUID, update: UserPackageUpdate, user: User = Depends(admin_user)):
+async def update_user_package(user_id: PydanticObjectId, update: UserPackageUpdate, user: User = Depends(admin_user)):
     user_to_update = await User.get(user_id)
     if not user_to_update:
         raise HTTPException(status_code=404, detail="User not found")
