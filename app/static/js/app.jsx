@@ -1,4 +1,18 @@
-const { useState, useEffect, useCallback } = React;
+const { useState, useEffect, useCallback, useRef } = React;
+
+// Custom hook for debouncing
+function useDebounce(value, delay) {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [value, delay]);
+    return debouncedValue;
+}
 
 // --- Helper Functions & Constants ---
 const getModifier = (score) => Math.floor((score - 10) / 2);
@@ -198,11 +212,22 @@ const AbilityScoreInput = ({ label, score, onScoreChange }) => {
 // --- Main Components ---
 const CharacterSheet = ({ character, onUpdate, onBack }) => {
     const [sheetData, setSheetData] = useState(character);
+    const debouncedSheetData = useDebounce(sheetData, 1000);
+    const isInitialMount = useRef(true);
     const [activeTab, setActiveTab] = useState('principale');
     const [isGenerating, setIsGenerating] = useState({ appearance: false, background: false, portrait: false, hook: false });
 
-    useEffect(() => { onUpdate(sheetData); }, [sheetData, onUpdate]);
-    useEffect(() => { setSheetData(character); }, [character]);
+    useEffect(() => {
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+        onUpdate(debouncedSheetData);
+    }, [debouncedSheetData, onUpdate]);
+
+    useEffect(() => {
+        setSheetData(character);
+    }, [character]);
 
     const handleChange = (path, value) => {
         setSheetData(prev => {
