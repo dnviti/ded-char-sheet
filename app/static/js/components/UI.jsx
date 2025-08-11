@@ -5,7 +5,7 @@ const ParchmentButton = ({ children, onClick, className = '', disabled = false }
 );
 
 const Section = ({ title, children, className = '', actions }) => (
-    <div className={`relative z-0 bg-white/40 border-2 border-stone-400/50 rounded-lg p-4 shadow-inner backdrop-blur-sm print:shadow-none print:border-stone-600 print:bg-white ${className}`}>
+    <div className={`relative bg-white/40 border-2 border-stone-400/50 rounded-lg p-4 shadow-inner print:shadow-none print:border-stone-600 print:bg-white ${className}`}>
         <div className="flex justify-between items-center mb-3 border-b-2 border-red-900/30 pb-1 print:border-b-2 print:border-stone-800">
             <h2 className="text-xl font-bold text-red-900/80 font-serif print:text-black">{title}</h2>
             {actions && <div className="flex-shrink-0 print:hidden">{actions}</div>}
