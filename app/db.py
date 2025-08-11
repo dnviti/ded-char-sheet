@@ -28,3 +28,7 @@ def get_collection_characters():
 def get_collection_open5e(resource_type: str):
     database = get_database()
     return database.get_collection(f"open5e_{resource_type}")
+
+def get_collection_gemini_usage():
+    database = get_database()
+    return database.get_collection("gemini_usage")
