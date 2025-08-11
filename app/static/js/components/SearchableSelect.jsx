@@ -43,7 +43,6 @@ const SearchableSelect = ({ resourceType, value, onSelect, placeholder }) => {
         }
     }, [debouncedSearchTerm, resourceType, isOpen]);
 
-    // Hook to close dropdown when clicking outside
     useEffect(() => {
         function handleClickOutside(event) {
             if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
@@ -73,23 +72,23 @@ const SearchableSelect = ({ resourceType, value, onSelect, placeholder }) => {
                 }}
                 onFocus={() => setIsOpen(true)}
                 placeholder={placeholder}
-                className="w-full bg-transparent focus:outline-none focus:bg-white/20 rounded-md p-1"
+                className="w-full theme-dnd-input"
             />
             {isOpen && (
-                <ul className="absolute z-10 w-full bg-white border border-stone-300 rounded-md mt-1 max-h-60 overflow-y-auto shadow-lg z-10">
+                <ul className="absolute z-50 w-full bg-parchment border-2 border-theme rounded-md mt-1 max-h-60 overflow-y-auto shadow-lg">
                     {results.length > 0 ? (
                         results.map((item) => (
                             <li
                                 key={item.key || item._id}
                                 onClick={() => handleSelect(item)}
-                                className="p-2 hover:bg-stone-100 cursor-pointer"
+                                className="p-2 text-wood-dark hover:bg-wood-light hover:text-parchment cursor-pointer"
                             >
                                 {item.name}
-                                {item.document?.name && <span className="text-xs text-stone-500 ml-2">({item.document.name})</span>}
+                                {item.document?.name && <span className="text-xs text-gray-500 ml-2">({item.document.name})</span>}
                             </li>
                         ))
                     ) : (
-                        <li className="p-2 text-stone-500 italic">
+                        <li className="p-2 text-wood-dark italic">
                             {debouncedSearchTerm.length < 2 ? "Type to search..." : "No results found."}
                         </li>
                     )}

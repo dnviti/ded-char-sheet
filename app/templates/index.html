@@ -11,7 +11,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=MedievalSharp&display=swap" rel="stylesheet">
 
     <!-- React and ReactDOM from CDN -->
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
@@ -25,14 +25,17 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/theme.css') }}">
 </head>
-<body class="bg-stone-100">
+<body class="theme-dnd">
     <div id="root"></div>
     <footer class="text-center text-xs text-stone-400 py-4 print:hidden">
         <p>Scheda Personaggio D&D 5e creata con Gemini</p>
     </footer>
 
     <script type="text/babel" src="{{ url_for('static', path='/js/components/UI.jsx') }}"></script>
+    <script type="text/babel" src="{{ url_for('static', path='/js/components/AuthForm.jsx') }}"></script>
+    <script type="text/babel" src="{{ url_for('static', path='/js/components/AdminDashboard.jsx') }}"></script>
     <script type="text/babel" src="{{ url_for('static', path='/js/components/SearchableSelect.jsx') }}"></script>
     <script type="text/babel" src="{{ url_for('static', path='/js/components/CharacterSheet.jsx') }}"></script>
     <script type="text/babel" src="{{ url_for('static', path='/js/components/CharacterSelector.jsx') }}"></script>
