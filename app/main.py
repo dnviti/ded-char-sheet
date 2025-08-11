@@ -16,18 +16,23 @@ from .users import User, get_user_db, UserRead, UserCreate, UserUpdate
 from scripts.load_open5e_data import main as cache_open5e_data_main
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from fastapi_users import FastAPIUsers
-from fastapi_users.authentication import JWTStrategy, AuthenticationBackend, CookieTransport
+from fastapi_users import FastAPIUsers, BaseUserManager, UUIDIDMixin
+from fastapi_users.authentication import (
+    AuthenticationBackend,
+    CookieTransport,
+    JWTStrategy,
+)
+from fastapi_users.db import BeanieUserDatabase
 
 SECRET = os.getenv("SECRET")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-app = FastAPI()
+class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
+    reset_password_token_secret = SECRET
+    verification_token_secret = SECRET
 
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-templates = Jinja2Templates(directory="app/templates")
-
-scheduler = AsyncIOScheduler()
+async def get_user_manager(user_db: BeanieUserDatabase = Depends(get_user_db)):
+    yield UserManager(user_db)
 
 cookie_transport = CookieTransport(cookie_name="dnd_token", cookie_max_age=3600)
 
@@ -40,13 +45,17 @@ auth_backend = AuthenticationBackend(
     get_strategy=get_jwt_strategy,
 )
 
-fastapi_users = FastAPIUsers[User, uuid.UUID](
-    get_user_db,
-    [auth_backend],
-)
+fastapi_users = FastAPIUsers[User, uuid.UUID](get_user_manager, [auth_backend])
 
-current_user = fastapi_users.current_user()
+current_user = fastapi_users.current_user(active=True)
 admin_user = fastapi_users.current_user(active=True, superuser=True)
+
+app = FastAPI()
+
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+templates = Jinja2Templates(directory="app/templates")
+
+scheduler = AsyncIOScheduler()
 
 class UserPackageUpdate(BaseModel):
     package: str
