@@ -11,14 +11,13 @@ from pydantic import BaseModel
 from typing import Optional, Dict, Any
 
 from .db import connect_to_mongo, close_mongo_connection, get_collection_characters, get_collection_open5e, get_database, get_collection_gemini_usage
-from .users import User, get_user_db
+from .users import User, get_user_db, UserRead, UserCreate, UserUpdate
 
 from scripts.load_open5e_data import main as cache_open5e_data_main
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from fastapi_users import FastAPIUsers
 from fastapi_users.authentication import JWTStrategy, AuthenticationBackend, CookieTransport
-from fastapi_users.schemas import UserRead, UserCreate, UserUpdate
 
 SECRET = os.getenv("SECRET")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")

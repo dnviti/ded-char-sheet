@@ -5,6 +5,6 @@ motor
 python-dotenv
 requests
 APScheduler
-fastapi-users[beanie]
+fastapi-users[beanie]==14.0.1
 email_validator
 httpx
