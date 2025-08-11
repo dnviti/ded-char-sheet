@@ -188,6 +188,7 @@ const SearchableSelect = ({ resourceType, value, onSelect, placeholder }) => {
                                 className="p-2 hover:bg-stone-100 cursor-pointer"
                             >
                                 {item.name}
+                                {item.document?.name && <span className="text-xs text-stone-500 ml-2">({item.document.name})</span>}
                             </li>
                         ))
                     ) : (
@@ -341,8 +342,14 @@ const CharacterSheet = ({ character, onUpdate, onBack }) => {
     const handleSelectFromAPI = (resourceType, item) => {
         setSheetData(prev => {
             const newState = JSON.parse(JSON.stringify(prev));
+            const blankCharacter = createNewCharacter();
 
             if (resourceType === 'classes') {
+                // Reset class-specific fields
+                newState.hitDice = blankCharacter.hitDice;
+                newState.savingThrows = blankCharacter.savingThrows;
+
+                // Replace class name and apply new data
                 newState.classLevel = item.name;
                 if (item.hit_dice) {
                     newState.hitDice.total = `1${item.hit_dice.toLowerCase()}`;
@@ -355,21 +362,23 @@ const CharacterSheet = ({ character, onUpdate, onBack }) => {
                         }
                     });
                 }
-                let features_text = item.features?.map(f => `**${f.name}**: ${f.desc}`).join('\n\n');
-                if(features_text) {
-                    newState.features = (newState.features ? newState.features + '\n\n' : '') + features_text;
-                }
+                // Replace features with new class features
+                newState.features = `**Class Features for ${item.name}:**\n` + item.features?.map(f => `**${f.name}**: ${f.desc}`).join('\n\n');
 
             } else if (resourceType === 'species') {
+                // Reset race-specific fields
+                newState.speed = blankCharacter.speed;
+
+                // Replace race name and apply new data
                 newState.race = item.name;
-                let traits_text = item.traits?.map(t => `**${t.name}**: ${t.desc}`).join('\n\n');
-                 if(traits_text) {
-                    newState.features = (newState.features ? newState.features + '\n\n' : '') + traits_text;
-                }
+
+                // Replace features with new racial traits
+                newState.features = `**Racial Traits for ${item.name}:**\n` + item.traits?.map(t => `**${t.name}**: ${t.desc}`).join('\n\n');
 
             } else if (resourceType === 'backgrounds') {
                 newState.background = item.name;
                 if (item.benefits) {
+                    let background_features = [];
                     item.benefits.forEach(benefit => {
                         if (benefit.type === 'skill_proficiency' && benefit.desc) {
                             const skillNames = benefit.desc.match(/([A-Z][a-z]+(\s[A-Z][a-z]+)*)/g);
@@ -382,13 +391,16 @@ const CharacterSheet = ({ character, onUpdate, onBack }) => {
                                 });
                             }
                         } else if (benefit.type === 'language' && benefit.desc) {
-                            newState.proficienciesAndLanguages = (newState.proficienciesAndLanguages ? newState.proficienciesAndLanguages + '\n' : '') + benefit.desc;
+                            newState.proficienciesAndLanguages = (newState.proficienciesAndLanguages ? newState.proficienciesAndLanguages + '\n' : '') + `Background: ${benefit.desc}`;
                         } else if (benefit.type === 'equipment' && benefit.desc) {
-                             newState.equipment = (newState.equipment ? newState.equipment + '\n' : '') + benefit.desc;
+                             newState.equipment = (newState.equipment ? newState.equipment + '\n' : '') + `Background Equipment: ${benefit.desc}`;
                         } else {
-                            newState.features = (newState.features ? newState.features + '\n' : '') + `**${benefit.name}**: ${benefit.desc}`;
+                            background_features.push(`**${benefit.name}**: ${benefit.desc}`);
                         }
                     });
+                    if(background_features.length > 0) {
+                        newState.features = (newState.features ? newState.features + '\n\n' : '') + `**Background Features for ${item.name}:**\n` + background_features.join('\n');
+                    }
                 }
             }
 
