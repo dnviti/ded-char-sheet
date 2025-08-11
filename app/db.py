@@ -24,3 +24,7 @@ async def close_mongo_connection():
 def get_collection_characters():
     database = get_database()
     return database.get_collection("characters")
+
+def get_collection_open5e(resource_type: str):
+    database = get_database()
+    return database.get_collection(f"open5e_{resource_type}")

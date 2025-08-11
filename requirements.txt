@@ -3,3 +3,5 @@ uvicorn[standard]
 jinja2
 motor
 python-dotenv
+requests
+APScheduler
