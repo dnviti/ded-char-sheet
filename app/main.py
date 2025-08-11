@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, Request, HTTPException, Response, BackgroundTasks
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -30,6 +31,13 @@ async def shutdown_event():
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/api/gemini-key")
+async def get_gemini_key():
+    gemini_api_key = os.getenv("GEMINI_API_KEY")
+    if not gemini_api_key:
+        raise HTTPException(status_code=500, detail="Gemini API key not configured on the server")
+    return {"apiKey": gemini_api_key}
 
 @app.get("/api/open5e/{resource_type}")
 async def search_open5e_resource(resource_type: str, search: str = ""):
