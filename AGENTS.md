@@ -61,3 +61,7 @@ The frontend is a React application written in a single JSX file (`app/static/js
 The application uses MongoDB. Make sure you have a running MongoDB instance that the application can connect to, as specified in your `.env` file. The application creates two types of collections:
 *   `characters`: Stores the character sheets created by users.
 *   `open5e_*`: A set of collections that cache data from the Open5e API (e.g., `open5e_spells`, `open5e_classes`).
+
+## Testing
+
+When testing the application, do not use Docker or Docker Compose. If you need to interact with the database during testing, you must ask for the test MongoDB connection string. Do not attempt to run a MongoDB instance yourself.
