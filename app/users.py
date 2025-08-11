@@ -3,6 +3,7 @@ from typing import Optional
 
 from beanie import Document, PydanticObjectId
 from fastapi_users import schemas
+from pydantic import ConfigDict
 from fastapi_users.db import BeanieBaseUser, BeanieUserDatabase
 
 class User(BeanieBaseUser, Document):
@@ -10,6 +11,9 @@ class User(BeanieBaseUser, Document):
     generation_count: Optional[int] = 0
 
 class UserRead(schemas.BaseUser[PydanticObjectId]):
+    model_config = ConfigDict(
+        json_encoders={PydanticObjectId: str}
+    )
     package: Optional[str] = "free"
     generation_count: Optional[int] = 0
 
