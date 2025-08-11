@@ -1,8 +1,9 @@
-from fastapi import FastAPI, Request, HTTPException, Response
+from fastapi import FastAPI, Request, HTTPException, Response, BackgroundTasks
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from .db import connect_to_mongo, close_mongo_connection, get_collection_characters, get_collection_open5e
+from scripts.load_open5e_data import main as cache_open5e_data_main
 
 app = FastAPI()
 
@@ -119,3 +120,13 @@ async def delete_character(character_id: str):
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Character not found")
     return Response(status_code=204)
+
+@app.post("/api/admin/cache-open5e-data", status_code=202)
+async def trigger_cache_job(background_tasks: BackgroundTasks):
+    """
+    Triggers the background job to fetch data from the Open5E API
+    and cache it in the local MongoDB.
+    """
+    print("Caching job triggered.")
+    background_tasks.add_task(cache_open5e_data_main)
+    return {"message": "Open5E data caching job has been started in the background."}

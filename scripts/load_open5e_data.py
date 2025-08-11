@@ -72,7 +72,8 @@ async def main():
         # 1. Fetch data from the API
         api_url = f"{API_BASE_URL}{endpoint}/"
         print(f"Fetching all data from {api_url}...")
-        data = await asyncio.to_thread(fetch_all_from_endpoint, api_url)
+        loop = asyncio.get_running_loop()
+        data = await loop.run_in_executor(None, fetch_all_from_endpoint, api_url)
 
         if not data:
             print(f"No data found for endpoint '{endpoint}'. Skipping.")
