@@ -4,7 +4,7 @@ from fastapi_users.db import BeanieBaseUser, BeanieUserDatabase
 
 from typing import Optional
 
-class User(BeanieBaseUser[uuid.UUID], Document):
+class User(BeanieBaseUser, Document):
     package: Optional[str] = "free"
     generation_count: Optional[int] = 0
 
