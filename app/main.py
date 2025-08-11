@@ -51,17 +51,27 @@ async def create_character(character_data: dict):
     else:
         await characters_collection.insert_one(character_data)
 
-    return character_data
+    # Fetch the character to get the _id and ensure it's serializable
+    created_character = await characters_collection.find_one({"id": character_id})
+    created_character["_id"] = str(created_character["_id"])
+
+    return created_character
 
 @app.put("/api/characters/{character_id}")
 async def update_character(character_id: str, character_data: dict):
     characters_collection = get_collection_characters()
-    result = await characters_collection.replace_one({"id": character_id}, character_data)
-    if result.matched_count == 0:
-        # If no document was replaced, it might be a good idea to insert it (upsert)
-        await characters_collection.insert_one(character_data)
-        return character_data
-    return character_data
+
+    # Use replace_one with upsert=True for a cleaner operation
+    await characters_collection.replace_one({"id": character_id}, character_data, upsert=True)
+
+    # Fetch the updated/created character to ensure data is fresh and serializable
+    updated_character = await characters_collection.find_one({"id": character_id})
+    if updated_character is None:
+         # This should not happen with upsert=True, but as a safeguard:
+        raise HTTPException(status_code=404, detail="Character could not be found after update.")
+
+    updated_character["_id"] = str(updated_character["_id"])
+    return updated_character
 
 @app.delete("/api/characters/{character_id}", status_code=204)
 async def delete_character(character_id: str):
