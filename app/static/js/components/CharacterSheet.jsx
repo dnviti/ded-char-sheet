@@ -6,6 +6,22 @@ const CharacterSheet = ({ character, onUpdate, onBack }) => {
     const isInitialMount = useRef(true);
     const [activeTab, setActiveTab] = useState('principale');
     const [isGenerating, setIsGenerating] = useState({ appearance: false, background: false, portrait: false, hook: false });
+    const [apiKey, setApiKey] = useState("");
+
+    useEffect(() => {
+        const fetchApiKey = async () => {
+            try {
+                const response = await fetch('/api/gemini-key');
+                if (!response.ok) throw new Error("Could not fetch API key");
+                const data = await response.json();
+                setApiKey(data.apiKey);
+            } catch (error) {
+                console.error("Failed to fetch Gemini API key:", error);
+                alert("Failed to fetch Gemini API key. Make sure it's configured on the server.");
+            }
+        };
+        fetchApiKey();
+    }, []);
 
     useEffect(() => {
         if (isInitialMount.current) {
@@ -137,8 +153,11 @@ const CharacterSheet = ({ character, onUpdate, onBack }) => {
     const calculatedSpellAttackBonus = sheetData.proficiencyBonus + spellcastingAbilityMod;
 
     const callGeminiAPI = async (prompt, jsonSchema = null) => {
-        const apiKey = ""; // Lasciare vuoto
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        if (!apiKey) {
+            alert("Gemini API key is not available.");
+            return null;
+        }
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
         const payload = { contents: [{ parts: [{ text: prompt }] }], ...(jsonSchema && { generationConfig: { responseMimeType: "application/json", responseSchema: jsonSchema } }) };
         try {
             const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
@@ -155,7 +174,10 @@ const CharacterSheet = ({ character, onUpdate, onBack }) => {
     };
 
     const callImagenAPI = async (prompt) => {
-        const apiKey = ""; // Lasciare vuoto
+        if (!apiKey) {
+            alert("Imagen API key is not available.");
+            return null;
+        }
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
         const payload = { instances: [{ prompt: prompt }], parameters: { "sampleCount": 1 } };
         try {

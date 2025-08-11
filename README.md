@@ -72,3 +72,4 @@ This is a web-based Dungeons & Dragons 5th Edition character sheet manager. It p
 
 *   `MONGODB_URL`: The connection string for your MongoDB instance.
 *   `MONGO_INITDB_DATABASE`: The name of the database to use for the application.
+*   `GEMINI_API_KEY`: Your API key for the Gemini and Imagen APIs.
