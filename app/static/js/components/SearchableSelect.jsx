@@ -63,7 +63,7 @@ const SearchableSelect = ({ resourceType, value, onSelect, placeholder }) => {
     };
 
     return (
-        <div className="relative" ref={wrapperRef}>
+        <div className={`relative ${isOpen ? 'z-20' : ''}`} ref={wrapperRef}>
             <input
                 type="text"
                 value={searchTerm || value}
