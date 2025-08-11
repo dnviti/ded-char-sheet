@@ -1,5 +1,70 @@
 const { useState, useEffect, useCallback, useRef } = React;
 
+const SheetHeader = ({
+    name, classLevel, race, background, alignment, playerName, experience,
+    onBack, onUpdate, onSelectAPI
+}) => {
+    return (
+        <div className="bg-wood-dark p-4 rounded-lg shadow-lg border-2 border-theme mb-6">
+            <div className="flex justify-between items-start">
+                <div className="flex-grow">
+                    <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => onUpdate('name', e.target.value)}
+                        className="text-5xl font-title bg-transparent border-b-2 border-transparent focus:border-accent-gold focus:outline-none w-full"
+                        placeholder="Character Name"
+                    />
+                </div>
+                <button onClick={onBack} className="theme-dnd-button-sm ml-4 print:hidden">&larr; Back</button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-3 mt-4 text-sm">
+                <div className="flex flex-col">
+                    <label className="font-bold text-accent-gold uppercase tracking-wider text-xs">Class & Level</label>
+                    <SearchableSelect
+                        endpoint="/api/open5e/classes"
+                        value={classLevel}
+                        onChange={(item) => onSelectAPI('classes', item)}
+                        placeholder="Select Class"
+                    />
+                </div>
+                <div className="flex flex-col">
+                    <label className="font-bold text-accent-gold uppercase tracking-wider text-xs">Race</label>
+                     <SearchableSelect
+                        endpoint="/api/open5e/species"
+                        value={race}
+                        onChange={(item) => onSelectAPI('species', item)}
+                        placeholder="Select Race"
+                    />
+                </div>
+                <div className="flex flex-col">
+                    <label className="font-bold text-accent-gold uppercase tracking-wider text-xs">Background</label>
+                    <SearchableSelect
+                        endpoint="/api/open5e/backgrounds"
+                        value={background}
+                        onChange={(item) => onSelectAPI('backgrounds', item)}
+                        placeholder="Select Background"
+                    />
+                </div>
+                <div className="flex flex-col">
+                    <label className="font-bold text-accent-gold uppercase tracking-wider text-xs">Alignment</label>
+                    <input type="text" value={alignment} onChange={(e) => onUpdate('alignment', e.target.value)} className="theme-dnd-input" />
+                </div>
+                <div className="flex flex-col">
+                    <label className="font-bold text-accent-gold uppercase tracking-wider text-xs">Player Name</label>
+                    <input type="text" value={playerName} onChange={(e) => onUpdate('playerName', e.target.value)} className="theme-dnd-input" />
+                </div>
+                 <div className="flex flex-col md:col-span-2 lg:col-span-1">
+                    <label className="font-bold text-accent-gold uppercase tracking-wider text-xs">Experience Points</label>
+                    <input type="number" value={experience} onChange={(e) => onUpdate('experience', parseInt(e.target.value) || 0)} className="theme-dnd-input" />
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
 // Main component remains the same for logic
 const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagenAPI }) => {
     const [sheetData, setSheetData] = useState(character);
