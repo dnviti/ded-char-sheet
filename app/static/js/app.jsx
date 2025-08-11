@@ -105,6 +105,18 @@ const StatBox = ({ label, value, className = "" }) => (
     </div>
 );
 
+const EditableStatBox = ({ label, value, onChange, className = "", type = "text" }) => (
+    <div className={`flex flex-col items-center justify-center p-2 bg-stone-50/70 border-2 border-stone-400 rounded-lg shadow-md ${className}`}>
+        <input
+            type={type}
+            value={value}
+            onChange={onChange}
+            className="w-full text-2xl font-bold text-stone-800 text-center bg-transparent focus:outline-none"
+        />
+        <label className="text-xs font-bold text-stone-700 text-center">{label}</label>
+    </div>
+);
+
 const DeathSaveTracker = ({ successes, failures, onUpdate }) => {
     const handleToggle = (type, index) => {
         const currentCount = type === 'successes' ? successes : failures;
@@ -365,9 +377,49 @@ const CharacterSheet = ({ character, onUpdate, onBack }) => {
         <div className="p-2 md:p-8 space-y-4">
             <div id="character-sheet-printable" className="bg-stone-100 print:bg-white p-2 md:p-4 print:p-0">
                 <header className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 print:mb-4">
-                    <div>
-                        <h1 className="text-3xl md:text-4xl font-serif text-red-900 print:text-5xl print:text-black">{sheetData.name}</h1>
-                        <p className="text-stone-600 mt-1 print:text-black">{sheetData.classLevel} | {sheetData.race}</p>
+                    <div className="flex-grow">
+                        <input
+                            type="text"
+                            value={sheetData.name}
+                            onChange={e => handleChange('name', e.target.value)}
+                            placeholder="Character Name"
+                            className="text-3xl md:text-4xl font-serif text-red-900 bg-transparent focus:outline-none focus:bg-white/20 rounded-md p-1 w-full"
+                        />
+                        <div className="flex items-center text-stone-600 mt-1">
+                            <input
+                                type="text"
+                                value={sheetData.classLevel}
+                                onChange={e => handleChange('classLevel', e.target.value)}
+                                placeholder="Class & Level"
+                                className="bg-transparent focus:outline-none focus:bg-white/20 rounded-md p-1 w-1/2"
+                            />
+                            <span className="mx-2">|</span>
+                            <input
+                                type="text"
+                                value={sheetData.race}
+                                onChange={e => handleChange('race', e.target.value)}
+                                placeholder="Race"
+                                className="bg-transparent focus:outline-none focus:bg-white/20 rounded-md p-1 w-1/2"
+                            />
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-1 mt-2 text-sm">
+                            <div className="flex flex-col">
+                                <label className="text-xs text-stone-500">Player Name</label>
+                                <input type="text" value={sheetData.playerName} onChange={e => handleChange('playerName', e.target.value)} placeholder="Player Name" className="bg-transparent focus:outline-none focus:bg-white/20 rounded-md p-1" />
+                            </div>
+                            <div className="flex flex-col">
+                                <label className="text-xs text-stone-500">Background</label>
+                                <input type="text" value={sheetData.background} onChange={e => handleChange('background', e.target.value)} placeholder="Background" className="bg-transparent focus:outline-none focus:bg-white/20 rounded-md p-1" />
+                            </div>
+                            <div className="flex flex-col">
+                                <label className="text-xs text-stone-500">Alignment</label>
+                                <input type="text" value={sheetData.alignment} onChange={e => handleChange('alignment', e.target.value)} placeholder="Alignment" className="bg-transparent focus:outline-none focus:bg-white/20 rounded-md p-1" />
+                            </div>
+                            <div className="flex flex-col">
+                                <label className="text-xs text-stone-500">Experience</label>
+                                <input type="number" value={sheetData.experience} onChange={e => handleChange('experience', parseInt(e.target.value) || 0)} placeholder="XP" className="bg-transparent focus:outline-none focus:bg-white/20 rounded-md p-1" />
+                            </div>
+                        </div>
                     </div>
                     <div className="flex space-x-2 print:hidden self-start">
                         <ParchmentButton onClick={handlePrint}>PDF</ParchmentButton>
@@ -396,15 +448,15 @@ const CharacterSheet = ({ character, onUpdate, onBack }) => {
                                     </div>
                                 </Section>
                                 <div className="grid grid-cols-3 gap-2">
-                                    <StatBox label="Ispirazione" value={sheetData.inspiration} />
+                                    <EditableStatBox label="Ispirazione" value={sheetData.inspiration} onChange={e => handleChange('inspiration', parseInt(e.target.value) || 0)} type="number" />
                                     <StatBox label="Bonus Competenza" value={`+${sheetData.proficiencyBonus}`} />
                                     <StatBox label="Percezione Passiva" value={passivePerception} />
                                 </div>
                                 <Section title="Combattimento">
                                     <div className="grid grid-cols-3 gap-4 text-center">
-                                        <StatBox label="CA" value={sheetData.armorClass} />
+                                        <EditableStatBox label="CA" value={sheetData.armorClass} onChange={e => handleChange('armorClass', parseInt(e.target.value) || 0)} type="number" />
                                         <StatBox label="Iniziativa" value={getModifier(sheetData.abilityScores.dexterity)} />
-                                        <StatBox label="Velocità" value={sheetData.speed} />
+                                        <EditableStatBox label="Velocità" value={sheetData.speed} onChange={e => handleChange('speed', e.target.value)} />
                                     </div>
                                     <div className="mt-4"><label className="font-bold">Punti Ferita</label><input type="number" value={sheetData.currentHp} onChange={e => handleChange('currentHp', e.target.value)} className="w-full p-2 text-2xl bg-white/80 border-2 border-stone-400 rounded-md font-bold text-center" /></div>
                                     <div className="mt-2"><label className="font-bold">PF Massimi</label><input type="number" value={sheetData.maxHp} onChange={e => handleChange('maxHp', e.target.value)} className="w-full p-1 text-lg bg-stone-50/70 border border-stone-300 rounded-md" /></div>
