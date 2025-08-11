@@ -24,11 +24,16 @@ from fastapi_users.authentication import (
 )
 from fastapi_users.db import BeanieUserDatabase, ObjectIDIDMixin
 from beanie import PydanticObjectId
+from fastapi.encoders import ENCODERS_BY_TYPE
+from bson import ObjectId
 
 SECRET = os.getenv("SECRET")
 if SECRET is None:
     raise ValueError("SECRET environment variable is not set")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+ENCODERS_BY_TYPE[PydanticObjectId] = str
+ENCODERS_BY_TYPE[ObjectId] = str
 
 class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
     reset_password_token_secret = SECRET
