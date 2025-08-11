@@ -1,7 +1,5 @@
 fastapi
 uvicorn[standard]
 jinja2
-sqlalchemy
-databases[aiosqlite]
-databases[mysql]
+motor
 python-dotenv

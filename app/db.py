@@ -1,23 +1,26 @@
 import os
-from databases import Database
+from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
-import sqlalchemy
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./test.db")
+MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
+DB_NAME = os.getenv("MONGO_INITDB_DATABASE", "dedchar")
 
-database = Database(DATABASE_URL)
-metadata = sqlalchemy.MetaData()
+class DataBase:
+    client: AsyncIOMotorClient = None
 
-characters = sqlalchemy.Table(
-    "characters",
-    metadata,
-    sqlalchemy.Column("id", sqlalchemy.String(36), primary_key=True),
-    sqlalchemy.Column("data", sqlalchemy.JSON),
-)
+db = DataBase()
 
-engine = sqlalchemy.create_engine(
-    DATABASE_URL
-)
-metadata.create_all(engine)
+def get_database() -> AsyncIOMotorClient:
+    return db.client[DB_NAME]
+
+async def connect_to_mongo():
+    db.client = AsyncIOMotorClient(MONGODB_URL)
+
+async def close_mongo_connection():
+    db.client.close()
+
+def get_collection_characters():
+    database = get_database()
+    return database.get_collection("characters")
