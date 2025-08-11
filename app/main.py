@@ -4,19 +4,28 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from .db import connect_to_mongo, close_mongo_connection, get_collection_characters, get_collection_open5e
 from scripts.load_open5e_data import main as cache_open5e_data_main
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
+scheduler = AsyncIOScheduler()
+
 @app.on_event("startup")
 async def startup_event():
     await connect_to_mongo()
+    scheduler.add_job(cache_open5e_data_main, 'cron', hour=3, minute=0, name="Daily Cache Job")
+    scheduler.add_job(cache_open5e_data_main, name="Initial Startup Cache Job")
+    scheduler.start()
+    print("Scheduler started. Caching job is scheduled to run daily at 3:00 AM UTC and once on startup.")
+
 
 @app.on_event("shutdown")
 async def shutdown_event():
     await close_mongo_connection()
+    scheduler.shutdown()
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
@@ -120,13 +129,3 @@ async def delete_character(character_id: str):
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Character not found")
     return Response(status_code=204)
-
-@app.post("/api/admin/cache-open5e-data", status_code=202)
-async def trigger_cache_job(background_tasks: BackgroundTasks):
-    """
-    Triggers the background job to fetch data from the Open5E API
-    and cache it in the local MongoDB.
-    """
-    print("Caching job triggered.")
-    background_tasks.add_task(cache_open5e_data_main)
-    return {"message": "Open5E data caching job has been started in the background."}
