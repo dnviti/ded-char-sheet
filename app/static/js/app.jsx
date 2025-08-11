@@ -117,6 +117,90 @@ const EditableStatBox = ({ label, value, onChange, className = "", type = "text"
     </div>
 );
 
+const SearchableSelect = ({ resourceType, value, onSelect, placeholder }) => {
+    const [searchTerm, setSearchTerm] = useState("");
+    const [results, setResults] = useState([]);
+    const [isOpen, setIsOpen] = useState(false);
+    const debouncedSearchTerm = useDebounce(searchTerm, 300);
+    const wrapperRef = useRef(null);
+
+    useEffect(() => {
+        const fetchResults = async () => {
+            if (debouncedSearchTerm.length < 2) {
+                setResults([]);
+                return;
+            }
+            try {
+                const response = await fetch(`/api/open5e/${resourceType}?search=${debouncedSearchTerm}`);
+                if (!response.ok) throw new Error("Network response was not ok");
+                const data = await response.json();
+                setResults(data);
+            } catch (error) {
+                console.error(`Failed to fetch ${resourceType}:`, error);
+                setResults([]);
+            }
+        };
+
+        if (isOpen) {
+            fetchResults();
+        }
+    }, [debouncedSearchTerm, resourceType, isOpen]);
+
+    // Hook to close dropdown when clicking outside
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [wrapperRef]);
+
+    const handleSelect = (item) => {
+        onSelect(item);
+        setSearchTerm(item.name);
+        setIsOpen(false);
+    };
+
+    return (
+        <div className="relative" ref={wrapperRef}>
+            <input
+                type="text"
+                value={searchTerm || value}
+                onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    if (!isOpen) setIsOpen(true);
+                }}
+                onFocus={() => setIsOpen(true)}
+                placeholder={placeholder}
+                className="w-full bg-transparent focus:outline-none focus:bg-white/20 rounded-md p-1"
+            />
+            {isOpen && (
+                <ul className="absolute z-10 w-full bg-white border border-stone-300 rounded-md mt-1 max-h-60 overflow-y-auto shadow-lg">
+                    {results.length > 0 ? (
+                        results.map((item) => (
+                            <li
+                                key={item.key || item._id}
+                                onClick={() => handleSelect(item)}
+                                className="p-2 hover:bg-stone-100 cursor-pointer"
+                            >
+                                {item.name}
+                            </li>
+                        ))
+                    ) : (
+                        <li className="p-2 text-stone-500 italic">
+                            {debouncedSearchTerm.length < 2 ? "Type to search..." : "No results found."}
+                        </li>
+                    )}
+                </ul>
+            )}
+        </div>
+    );
+};
+
 const DeathSaveTracker = ({ successes, failures, onUpdate }) => {
     const handleToggle = (type, index) => {
         const currentCount = type === 'successes' ? successes : failures;
@@ -254,6 +338,88 @@ const CharacterSheet = ({ character, onUpdate, onBack }) => {
         });
     };
 
+    const handleSelectFromAPI = (resourceType, item) => {
+        setSheetData(prev => {
+            const newState = JSON.parse(JSON.stringify(prev));
+
+            if (resourceType === 'classes') {
+                newState.classLevel = item.name;
+                if (item.hit_dice) {
+                    newState.hitDice.total = `1${item.hit_dice.toLowerCase()}`;
+                }
+                if (item.saving_throws) {
+                    item.saving_throws.forEach(st => {
+                        const key = st.name.toLowerCase();
+                        if (newState.savingThrows[key]) {
+                            newState.savingThrows[key].proficient = true;
+                        }
+                    });
+                }
+                let features_text = item.features?.map(f => `**${f.name}**: ${f.desc}`).join('\n\n');
+                if(features_text) {
+                    newState.features = (newState.features ? newState.features + '\n\n' : '') + features_text;
+                }
+
+            } else if (resourceType === 'species') {
+                newState.race = item.name;
+                let traits_text = item.traits?.map(t => `**${t.name}**: ${t.desc}`).join('\n\n');
+                 if(traits_text) {
+                    newState.features = (newState.features ? newState.features + '\n\n' : '') + traits_text;
+                }
+
+            } else if (resourceType === 'backgrounds') {
+                newState.background = item.name;
+                if (item.benefits) {
+                    item.benefits.forEach(benefit => {
+                        if (benefit.type === 'skill_proficiency' && benefit.desc) {
+                            const skillNames = benefit.desc.match(/([A-Z][a-z]+(\s[A-Z][a-z]+)*)/g);
+                            if (skillNames) {
+                                skillNames.forEach(skillName => {
+                                    const skillKey = Object.keys(SKILL_NAMES).find(key => SKILL_NAMES[key].name.toLowerCase() === skillName.toLowerCase());
+                                    if (skillKey && newState.skills[skillKey]) {
+                                        newState.skills[skillKey].proficient = true;
+                                    }
+                                });
+                            }
+                        } else if (benefit.type === 'language' && benefit.desc) {
+                            newState.proficienciesAndLanguages = (newState.proficienciesAndLanguages ? newState.proficienciesAndLanguages + '\n' : '') + benefit.desc;
+                        } else if (benefit.type === 'equipment' && benefit.desc) {
+                             newState.equipment = (newState.equipment ? newState.equipment + '\n' : '') + benefit.desc;
+                        } else {
+                            newState.features = (newState.features ? newState.features + '\n' : '') + `**${benefit.name}**: ${benefit.desc}`;
+                        }
+                    });
+                }
+            }
+
+            return newState;
+        });
+    };
+
+    const handleAddItemToEquipment = (item) => {
+        setSheetData(prev => {
+            const newState = JSON.parse(JSON.stringify(prev));
+            const itemText = `\n- ${item.name}`;
+            newState.equipment = (newState.equipment || '') + itemText;
+            return newState;
+        });
+    };
+
+    const handleAddSpellFromSearch = (spell) => {
+        setSheetData(prev => {
+            const newState = JSON.parse(JSON.stringify(prev));
+            const level = spell.level;
+
+            if (level === 0) { // Cantrip
+                newState.spellcasting.cantrips.push({ name: spell.name, prepared: true });
+            } else if (level > 0 && level <= 9) {
+                const levelIndex = level - 1;
+                newState.spellcasting.levels[levelIndex].spells.push({ name: spell.name, prepared: false });
+            }
+            return newState;
+        });
+    };
+
     const handleSpellcastingChange = (levelIndex, field, value) => {
         const newLevels = [...sheetData.spellcasting.levels];
         newLevels[levelIndex][field] = value;
@@ -386,21 +552,23 @@ const CharacterSheet = ({ character, onUpdate, onBack }) => {
                             className="text-3xl md:text-4xl font-serif text-red-900 bg-transparent focus:outline-none focus:bg-white/20 rounded-md p-1 w-full"
                         />
                         <div className="flex items-center text-stone-600 mt-1">
-                            <input
-                                type="text"
-                                value={sheetData.classLevel}
-                                onChange={e => handleChange('classLevel', e.target.value)}
-                                placeholder="Class & Level"
-                                className="bg-transparent focus:outline-none focus:bg-white/20 rounded-md p-1 w-1/2"
-                            />
+                            <div className="w-1/2">
+                                <SearchableSelect
+                                    resourceType="classes"
+                                    value={sheetData.classLevel}
+                                    onSelect={(item) => handleSelectFromAPI('classes', item)}
+                                    placeholder="Class & Level"
+                                />
+                            </div>
                             <span className="mx-2">|</span>
-                            <input
-                                type="text"
-                                value={sheetData.race}
-                                onChange={e => handleChange('race', e.target.value)}
-                                placeholder="Race"
-                                className="bg-transparent focus:outline-none focus:bg-white/20 rounded-md p-1 w-1/2"
-                            />
+                            <div className="w-1/2">
+                                <SearchableSelect
+                                    resourceType="species"
+                                    value={sheetData.race}
+                                    onSelect={(item) => handleSelectFromAPI('species', item)}
+                                    placeholder="Race"
+                                />
+                            </div>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-1 mt-2 text-sm">
                             <div className="flex flex-col">
@@ -409,7 +577,12 @@ const CharacterSheet = ({ character, onUpdate, onBack }) => {
                             </div>
                             <div className="flex flex-col">
                                 <label className="text-xs text-stone-500">Background</label>
-                                <input type="text" value={sheetData.background} onChange={e => handleChange('background', e.target.value)} placeholder="Background" className="bg-transparent focus:outline-none focus:bg-white/20 rounded-md p-1" />
+                                <SearchableSelect
+                                    resourceType="backgrounds"
+                                    value={sheetData.background}
+                                    onSelect={(item) => handleSelectFromAPI('backgrounds', item)}
+                                    placeholder="Background"
+                                />
                             </div>
                             <div className="flex flex-col">
                                 <label className="text-xs text-stone-500">Alignment</label>
@@ -529,6 +702,35 @@ const CharacterSheet = ({ character, onUpdate, onBack }) => {
                                         ))}
                                     </div>
                                     <TextAreaInput label="" value={sheetData.equipment} onChange={e => handleChange('equipment', e.target.value)} rows={10} />
+                                    <div className="mt-4 space-y-2 print:hidden">
+                                        <div>
+                                            <label className="font-bold text-sm">Add Item:</label>
+                                            <SearchableSelect
+                                                resourceType="items"
+                                                value=""
+                                                onSelect={(item) => handleAddItemToEquipment(item)}
+                                                placeholder="Search for an item..."
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="font-bold text-sm">Add Weapon:</label>
+                                            <SearchableSelect
+                                                resourceType="weapons"
+                                                value=""
+                                                onSelect={(item) => handleAddItemToEquipment(item)}
+                                                placeholder="Search for a weapon..."
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="font-bold text-sm">Add Armor:</label>
+                                            <SearchableSelect
+                                                resourceType="armor"
+                                                value=""
+                                                onSelect={(item) => handleAddItemToEquipment(item)}
+                                                placeholder="Search for an armor..."
+                                            />
+                                        </div>
+                                    </div>
                                 </Section>
                                 <Section title="Privilegi & Tratti">
                                     <TextAreaInput label="" value={sheetData.features} onChange={e => handleChange('features', e.target.value)} rows={10} />
@@ -553,6 +755,15 @@ const CharacterSheet = ({ character, onUpdate, onBack }) => {
                                 </div>
                                 <StatBox label="CD Tiro Salvezza" value={calculatedSpellSaveDC} />
                                 <StatBox label="Bonus Attacco Inc." value={`+${calculatedSpellAttackBonus}`} />
+                            </div>
+                            <div className="mt-4 print:hidden">
+                                <label className="font-bold text-sm">Add Spell:</label>
+                                <SearchableSelect
+                                    resourceType="spells"
+                                    value=""
+                                    onSelect={handleAddSpellFromSearch}
+                                    placeholder="Search for a spell..."
+                                />
                             </div>
                         </Section>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
