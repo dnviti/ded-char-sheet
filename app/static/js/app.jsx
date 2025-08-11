@@ -53,6 +53,22 @@ function App() {
     const [characters, setCharacters] = useState([]);
     const [selectedCharacterId, setSelectedCharacterId] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [apiKey, setApiKey] = useState("");
+
+    useEffect(() => {
+        const fetchApiKey = async () => {
+            try {
+                const response = await fetch('/api/gemini-key');
+                if (!response.ok) throw new Error("Could not fetch API key");
+                const data = await response.json();
+                setApiKey(data.apiKey);
+            } catch (error) {
+                console.error("Failed to fetch Gemini API key:", error);
+                alert("Failed to fetch Gemini API key. Make sure it's configured on the server.");
+            }
+        };
+        fetchApiKey();
+    }, []);
 
     useEffect(() => {
         const fetchCharacters = async () => {
@@ -71,6 +87,48 @@ function App() {
         };
         fetchCharacters();
     }, []);
+
+    const callGeminiAPI = async (prompt, jsonSchema = null) => {
+        if (!apiKey) {
+            alert("Gemini API key is not available.");
+            return null;
+        }
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+        const payload = { contents: [{ parts: [{ text: prompt }] }], ...(jsonSchema && { generationConfig: { responseMimeType: "application/json", responseSchema: jsonSchema } }) };
+        try {
+            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (!response.ok) { const errorBody = await response.text(); throw new Error(`API Error: ${response.status} ${response.statusText}\n${errorBody}`); }
+            const result = await response.json();
+            const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!text) { throw new Error("Invalid or empty API response."); }
+            return text;
+        } catch (error) {
+            console.error("Error calling Gemini API:", error);
+            alert(`An error occurred while generating text: ${error.message}`);
+            return null;
+        }
+    };
+
+    const callImagenAPI = async (prompt) => {
+        if (!apiKey) {
+            alert("Imagen API key is not available.");
+            return null;
+        }
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+        const payload = { instances: [{ prompt: prompt }], parameters: { "sampleCount": 1 } };
+        try {
+            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (!response.ok) { const errorBody = await response.text(); throw new Error(`API Error: ${response.status} ${response.statusText}\n${errorBody}`); }
+            const result = await response.json();
+            const base64Data = result?.predictions?.[0]?.bytesBase64Encoded;
+            if (!base64Data) { throw new Error("Invalid or empty API response for image."); }
+            return `data:image/png;base64,${base64Data}`;
+        } catch (error) {
+            console.error("Error calling Imagen API:", error);
+            alert(`An error occurred while generating the image: ${error.message}`);
+            return null;
+        }
+    };
 
     const handleCreateCharacter = async () => {
         const newChar = createNewCharacter();
@@ -91,20 +149,81 @@ function App() {
     };
 
     const handleFullGenerateCharacter = async (concept) => {
-        // Omitting the full implementation for brevity.
-        // This function should generate the character data as before,
-        // then save it to the database.
         console.log("Generating character with concept:", concept);
-        // ... (call Gemini/Imagen APIs)
-        // const newChar = ...
-        // After generation:
-        // try {
-        //     const response = await fetch('/api/characters', { /* POST request */ });
-        //     const savedChar = await response.json();
-        //     setCharacters(prev => [...prev, savedChar]);
-        //     setSelectedCharacterId(savedChar.id);
-        // } catch (error) { ... }
-        alert("Full AI character generation needs to be reconnected to the backend.");
+        if (!apiKey) {
+            alert("API Key not configured. Full generation is not available.");
+            return;
+        }
+
+        const schema = {
+            type: "OBJECT",
+            properties: {
+                name: { type: "STRING", description: "The character's name." },
+                classLevel: { type: "STRING", description: "The character's class and level, e.g., 'Fighter 1'." },
+                race: { type: "STRING", description: "The character's race, e.g., 'Human'." },
+                background: { type: "STRING", description: "The character's background, e.g., 'Acolyte'." },
+                alignment: { type: "STRING", description: "The character's alignment, e.g., 'Lawful Good'." },
+                abilityScores: {
+                    type: "OBJECT",
+                    properties: {
+                        strength: { type: "INTEGER", description: "The character's strength score (between 3 and 18)." },
+                        dexterity: { type: "INTEGER", description: "The character's dexterity score (between 3 and 18)." },
+                        constitution: { type: "INTEGER", description: "The character's constitution score (between 3 and 18)." },
+                        intelligence: { type: "INTEGER", description: "The character's intelligence score (between 3 and 18)." },
+                        wisdom: { type: "INTEGER", description: "The character's wisdom score (between 3 and 18)." },
+                        charisma: { type: "INTEGER", description: "The character's charisma score (between 3 and 18)." },
+                    },
+                    required: ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"],
+                },
+                appearance: { type: "STRING", description: "A brief description of the character's physical appearance (2-3 sentences)." },
+                personalityTraits: { type: "STRING", description: "The character's main personality trait." },
+                ideals: { type: "STRING", description: "The character's main ideal." },
+                bonds: { type: "STRING", description: "The character's main bond." },
+                flaws: { type: "STRING", description: "The character's main flaw." },
+            },
+            required: ["name", "classLevel", "race", "background", "alignment", "abilityScores", "appearance", "personalityTraits", "ideals", "bonds", "flaws"],
+        };
+
+        const prompt = `You are a D&D expert. Generate a complete level 1 character sheet based on this concept: "${concept}". Follow the provided JSON schema precisely.`;
+
+        try {
+            const generatedJson = await callGeminiAPI(prompt, schema);
+            if (!generatedJson) return;
+
+            const parsedData = JSON.parse(generatedJson);
+            const newChar = {
+                ...createNewCharacter(),
+                ...parsedData,
+                id: crypto.randomUUID(), // Ensure a new ID is generated
+            };
+
+            // Generate portrait
+            const portraitPrompt = `Fantasy character portrait, D&D style. ${newChar.appearance}. High quality digital painting, detailed face, fantasy art, cinematic lighting.`;
+            const imageUrl = await callImagenAPI(portraitPrompt);
+            if (imageUrl) {
+                newChar.imageUrl = imageUrl;
+            }
+
+            // Save the character
+            const response = await fetch('/api/characters', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newChar),
+            });
+
+            if (!response.ok) {
+                const errorBody = await response.text();
+                throw new Error(`Failed to save character: ${errorBody}`);
+            }
+
+            const savedChar = await response.json();
+            setCharacters(prev => [...prev, savedChar]);
+            setSelectedCharacterId(savedChar.id);
+
+        } catch (error) {
+            console.error("Full character generation failed:", error);
+            alert(`An error occurred during full character generation: ${error.message}`);
+        }
     };
 
     const handleSelectCharacter = (id) => { setSelectedCharacterId(id); };
