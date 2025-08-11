@@ -1,0 +1,77 @@
+/* --- D&D Themed Styles --- */
+
+/* --- Fonts --- */
+/* This will be loaded in the HTML file from Google Fonts */
+
+/* --- Color Palette --- */
+:root {
+    --bg-wood-dark: #3a2a1a; /* A dark, rich brown */
+    --bg-wood-light: #5f4529; /* A lighter brown for accents */
+    --bg-parchment: #fdf5e6; /* A parchment/papyrus color */
+    --text-light: #f5f5f5; /* A slightly off-white for readability */
+    --text-dark: #3a2a1a; /* Dark brown for text on light backgrounds */
+    --accent-gold: #daa520; /* A classic gold for highlights */
+    --accent-red: #8b0000; /* A deep, dark red for call-to-actions */
+    --border-color: #7a5c3b; /* A border color that fits the theme */
+}
+
+/* --- Global Styles --- */
+body.theme-dnd {
+    background-color: var(--bg-wood-dark);
+    color: var(--text-light);
+    font-family: 'Lora', serif;
+}
+
+h1, h2, h3, h4, h5, h6, .font-title {
+    font-family: 'MedievalSharp', cursive;
+    font-weight: 400;
+    color: var(--accent-gold);
+    letter-spacing: 1px;
+}
+
+/* --- Utility Classes --- */
+.bg-parchment { background-color: var(--bg-parchment); }
+.text-parchment { color: var(--bg-parchment); }
+.bg-wood-light { background-color: var(--bg-wood-light); }
+.text-wood-dark { color: var(--text-dark); }
+.border-theme { border-color: var(--border-color); }
+.accent-gold { color: var(--accent-gold); }
+.accent-red-bg { background-color: var(--accent-red); }
+
+/* --- Component Overrides (will be added as we redesign) --- */
+.theme-dnd-button {
+    background-color: var(--accent-red);
+    color: var(--text-light);
+    font-family: 'MedievalSharp', cursive;
+    border: 1px solid var(--accent-gold);
+    padding: 0.5rem 1rem;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.theme-dnd-button:hover {
+    background-color: var(--accent-gold);
+    color: var(--text-dark);
+    border-color: var(--accent-red);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+}
+
+.theme-dnd-input {
+    background-color: var(--bg-parchment);
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem;
+    border-radius: 2px;
+}
+
+.theme-dnd-input::placeholder {
+    color: #9e8a70;
+}
+
+.theme-dnd-card {
+    background-color: var(--bg-wood-light);
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+}

@@ -49,134 +49,7 @@ const SAVING_THROW_NAMES = {
     intelligence: "Intelligence", wisdom: "Wisdom", charisma: "Charisma",
 };
 
-const AuthForm = ({ onLogin, onRegister }) => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [isRegister, setIsRegister] = useState(false);
-    const [error, setError] = useState("");
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError("");
-        try {
-            if (isRegister) {
-                await onRegister(email, password);
-            } else {
-                await onLogin(email, password);
-            }
-        } catch (err) {
-            setError(err.message);
-        }
-    };
-
-    return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white">
-            <div className="p-8 bg-gray-800 rounded-lg shadow-lg w-full max-w-sm">
-                <h2 className="text-2xl font-serif text-center mb-6">{isRegister ? "Create an Account" : "Welcome Back"}</h2>
-                {error && <p className="bg-red-500/50 text-white p-3 rounded mb-4">{error}</p>}
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="block mb-1 font-sans">Email</label>
-                        <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="hero@example.com" required className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500"/>
-                    </div>
-                    <div>
-                        <label className="block mb-1 font-sans">Password</label>
-                        <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500"/>
-                    </div>
-                    <button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-300">
-                        {isRegister ? "Register" : "Login"}
-                    </button>
-                </form>
-                <button onClick={() => { setIsRegister(!isRegister); setError(""); }} className="w-full mt-4 text-center text-sm text-gray-400 hover:text-white">
-                    {isRegister ? "Already have an account? Login" : "Need an account? Register"}
-                </button>
-            </div>
-        </div>
-    );
-};
-
-const AdminDashboard = () => {
-    const [users, setUsers] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
-
-    useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                setLoading(true);
-                const response = await fetch('/api/admin/users');
-                if (!response.ok) {
-                    throw new Error("Failed to fetch users. Are you an admin?");
-                }
-                const data = await response.json();
-                setUsers(data);
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchUsers();
-    }, []);
-
-    const handlePackageChange = async (userId, newPackage) => {
-        try {
-            const response = await fetch(`/api/admin/users/${userId}/package`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ package: newPackage })
-            });
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.detail || "Failed to update package.");
-            }
-            const updatedUser = await response.json();
-            setUsers(users.map(u => u.id === userId ? updatedUser : u));
-        } catch (err) {
-            alert(err.message);
-        }
-    };
-
-    if (loading) return <p className="text-white text-center">Loading users...</p>;
-    if (error) return <p className="text-red-500 text-center">Error: {error}</p>;
-
-    return (
-        <div className="bg-gray-800 p-6 rounded-lg shadow-lg mt-6">
-            <h2 className="text-2xl font-serif mb-4 text-white">Admin Dashboard</h2>
-            <div className="overflow-x-auto">
-                <table className="w-full text-left text-gray-300">
-                    <thead className="bg-gray-700">
-                        <tr>
-                            <th className="p-3">Email</th>
-                            <th className="p-3">Package</th>
-                            <th className="p-3">Generations Used</th>
-                            <th className="p-3">Set Package</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {users.map(user => (
-                            <tr key={user.id} className="border-b border-gray-700 hover:bg-gray-600">
-                                <td className="p-3">{user.email}</td>
-                                <td className="p-3">{user.package}</td>
-                                <td className="p-3">{user.generation_count}</td>
-                                <td className="p-3">
-                                    <select
-                                        value={user.package}
-                                        onChange={(e) => handlePackageChange(user.id, e.target.value)}
-                                        className="bg-gray-900 text-white p-2 rounded"
-                                    >
-                                        <option value="free">free</option>
-                                        <option value="premium">premium</option>
-                                    </select>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    );
-};
 
 function App() {
     const [characters, setCharacters] = useState([]);
@@ -444,35 +317,41 @@ function App() {
     const selectedCharacter = characters.find(c => c.id === selectedCharacterId);
 
     if (!authChecked) {
-        return <div className="min-h-screen flex items-center justify-center text-xl font-serif bg-gray-900 text-white">Checking session...</div>;
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center p-4">
+                <h1 className="text-4xl font-title">Loading the Tavern...</h1>
+            </div>
+        );
     }
 
     return (
-        <main>
+        <>
             {currentUser ? (
-                <>
-                    <header className="bg-gray-800 text-white p-4 flex justify-between items-center shadow-md">
-                        <h1 className="text-xl font-serif">D&D Character Keep</h1>
+                <div className="min-h-screen">
+                    <header className="bg-wood-light border-b-4 border-theme p-4 flex justify-between items-center shadow-lg print:hidden">
+                        <h1 className="text-3xl font-title">Character Keep</h1>
                         <div className="flex items-center">
-                            <span className="mr-4">{currentUser.email}</span>
-                            <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-300">Logout</button>
+                            <span className="mr-4 text-parchment hidden sm:inline">{currentUser.email}</span>
+                            <button onClick={handleLogout} className="theme-dnd-button">Logout</button>
                         </div>
                     </header>
-                    <div className="p-4">
-                    {currentUser.is_superuser && <AdminDashboard />}
-                    {loading ? (
-                        <div className="flex items-center justify-center text-xl font-serif mt-10">Loading Heroes...</div>
-                    ) : !selectedCharacter ? (
-                        <CharacterSelector characters={characters} onSelect={handleSelectCharacter} onCreate={handleCreateCharacter} onDelete={handleDeleteCharacter} onFullGenerate={handleFullGenerateCharacter} />
-                    ) : (
-                        <CharacterSheet character={selectedCharacter} onUpdate={handleUpdateCharacter} onBack={handleBackToSelector} callGeminiAPI={callGeminiAPI} callImagenAPI={callImagenAPI} />
-                    )}
-                    </div>
-                </>
+                    <main className="p-4 md:p-8">
+                        {currentUser.is_superuser && <AdminDashboard />}
+                        {loading ? (
+                             <div className="flex flex-col items-center justify-center p-4">
+                                <h1 className="text-4xl font-title">Loading Heroes...</h1>
+                            </div>
+                        ) : !selectedCharacter ? (
+                            <CharacterSelector characters={characters} onSelect={handleSelectCharacter} onCreate={handleCreateCharacter} onDelete={handleDeleteCharacter} onFullGenerate={handleFullGenerateCharacter} />
+                        ) : (
+                            <CharacterSheet character={selectedCharacter} onUpdate={handleUpdateCharacter} onBack={handleBackToSelector} callGeminiAPI={callGeminiAPI} callImagenAPI={callImagenAPI} />
+                        )}
+                    </main>
+                </div>
             ) : (
                 <AuthForm onLogin={handleLogin} onRegister={handleRegister} />
             )}
-        </main>
+        </>
     );
 }
 
