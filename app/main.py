@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, Request, Depends
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from beanie import init_beanie
@@ -65,6 +65,23 @@ async def read_root(request: Request):
         "index.html",
         {
             "request": request,
+            "REGISTRATIONS_ENABLED": REGISTRATIONS_ENABLED,
+        },
+    )
+
+
+@app.get("/character/sheet", response_class=RedirectResponse)
+async def redirect_to_root():
+    return RedirectResponse(url="/")
+
+
+@app.get("/character/sheet/{character_id}", response_class=HTMLResponse)
+async def read_character_sheet(request: Request, character_id: str):
+    return templates.TemplateResponse(
+        "character_sheet.html",
+        {
+            "request": request,
+            "character_id": character_id,
             "REGISTRATIONS_ENABLED": REGISTRATIONS_ENABLED,
         },
     )
