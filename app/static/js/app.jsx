@@ -5,7 +5,10 @@ const getModifier = (score) => Math.floor((score - 10) / 2);
 
 const createNewCharacter = () => ({
   id: crypto.randomUUID(),
-  name: "New Hero", classLevel: "Fighter 1", race: "Human", background: "Acolyte", alignment: "Lawful Good",
+  name: "New Hero",
+  className: "Fighter",
+  level: 1,
+  race: "Human", background: "Acolyte", alignment: "Lawful Good",
   playerName: "", experience: 0,
   abilityScores: { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
   inspiration: 0, proficiencyBonus: 2,
@@ -214,7 +217,8 @@ function App() {
             type: "OBJECT",
             properties: {
                 name: { type: "STRING", description: "The character's name." },
-                classLevel: { type: "STRING", description: "The character's class and level, e.g., 'Fighter 1'." },
+                className: { type: "STRING", description: "The character's class name, e.g., 'Fighter'." },
+                level: { type: "INTEGER", description: "The character's level, e.g., 1." },
                 race: { type: "STRING", description: "The character's race, e.g., 'Human'." },
                 background: { type: "STRING", description: "The character's background, e.g., 'Acolyte'." },
                 alignment: { type: "STRING", description: "The character's alignment, e.g., 'Lawful Good'." },
@@ -236,7 +240,7 @@ function App() {
                 bonds: { type: "STRING", description: "The character's main bond." },
                 flaws: { type: "STRING", description: "The character's main flaw." },
             },
-            required: ["name", "classLevel", "race", "background", "alignment", "abilityScores", "appearance", "personalityTraits", "ideals", "bonds", "flaws"],
+            required: ["name", "className", "level", "race", "background", "alignment", "abilityScores", "appearance", "personalityTraits", "ideals", "bonds", "flaws"],
         };
 
         const prompt = `You are a D&D expert. Generate a complete level 1 character sheet based on this concept: "${concept}". Follow the provided JSON schema precisely.`;
