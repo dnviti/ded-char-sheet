@@ -145,11 +145,11 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
                 onLayoutChange={handleLayoutChange}
                 draggableHandle=".tile-header"
             >
-                <div key="ability-scores" className="themed-box">
+                <div key="ability-scores">
                     <div className="tile-header">Ability Scores</div>
                     <AbilityScores scores={sheetData.abilityScores} onUpdate={handleChange} />
                 </div>
-                <div key="inspiration-prof-perc" className="themed-box">
+                <div key="inspiration-prof-perc">
                     <div className="tile-header">Stats</div>
                     <div className="grid grid-cols-3 gap-2 text-center">
                         <ThemedStatBox label="Inspiration" value={sheetData.inspiration} onUpdate={(val) => handleChange('inspiration', val)} editable />
@@ -157,11 +157,11 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
                         <ThemedStatBox label="Passive Percep." value={passivePerception} />
                     </div>
                 </div>
-                <div key="saving-throws" className="themed-box">
+                <div key="saving-throws">
                     <div className="tile-header">Saving Throws</div>
                     <SavingThrows savingThrows={sheetData.savingThrows} abilityScores={sheetData.abilityScores} proficiencyBonus={sheetData.proficiencyBonus} onUpdate={handleChange} />
                 </div>
-                <div key="combat-stats" className="themed-box">
+                <div key="combat-stats">
                     <div className="tile-header">Combat</div>
                     <CombatStats
                         ac={sheetData.armorClass}
@@ -171,11 +171,11 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
                         onUpdate={handleChange}
                     />
                 </div>
-                <div key="attacks" className="themed-box">
+                <div key="attacks">
                     <div className="tile-header">Attacks</div>
                     <Attacks equipment={sheetData.equipment} onUpdate={(val) => handleChange('equipment', val)} />
                 </div>
-                <div key="character-portrait" className="themed-box">
+                <div key="character-portrait">
                     <div className="tile-header">Portrait</div>
                     <CharacterPortrait
                         imageUrl={sheetData.imageUrl}
@@ -183,7 +183,7 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
                         onGenerate={() => handleGenerate('portrait', `Fantasy character portrait, D&D style. ${sheetData.appearance || `A ${sheetData.race} ${sheetData.className} ${sheetData.level}`}. High quality digital painting, detailed face, fantasy art, cinematic lighting.`, null, generationDeps)}
                     />
                 </div>
-                <div key="equipment" className="themed-box">
+                <div key="equipment">
                     <div className="tile-header">Equipment</div>
                     <Equipment
                         equipment={sheetData.equipment}
@@ -192,11 +192,11 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
                         onAddItem={handleAddItemToEquipment}
                     />
                 </div>
-                <div key="skills" className="themed-box">
+                <div key="skills">
                     <div className="tile-header">Skills</div>
                     <Skills skills={sheetData.skills} abilityScores={sheetData.abilityScores} proficiencyBonus={sheetData.proficiencyBonus} onUpdate={handleChange} />
                 </div>
-                <div key="character-background" className="themed-box">
+                <div key="character-background">
                     <div className="tile-header">Background</div>
                     <CharacterBackground
                         data={sheetData}
@@ -205,11 +205,11 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
                         onUpdate={handleChange}
                     />
                 </div>
-                <div key="features-traits" className="themed-box">
+                <div key="features-traits">
                     <div className="tile-header">Features & Traits</div>
                     <FeaturesTraits features={sheetData.features} onUpdate={(val) => handleChange('features', val)} />
                 </div>
-                <div key="spells" className="themed-box">
+                <div key="spells">
                     <div className="tile-header">Spells</div>
                     <Spells
                         spellcasting={sheetData.spellcasting}

@@ -13,7 +13,11 @@ body {
     background-color: #c8a_9_5; /* A slightly darker shade for hover */
 }
 
-.themed-box {
+.react-grid-layout {
+    position: relative;
+    transition: height 200ms ease;
+}
+.react-grid-item {
     background-color: var(--bg-parchment);
     color: var(--text-dark);
     border: 2px solid var(--border-color);
@@ -21,16 +25,8 @@ body {
     padding: 1rem;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     overflow: auto;
-}
-
-.react-grid-layout {
-    position: relative;
-    transition: height 200ms ease;
-}
-.react-grid-item {
     transition: all 200ms ease;
     transition-property: left, top;
-    background: transparent;
 }
 .react-grid-item.cssTransforms {
     transition-property: transform;
