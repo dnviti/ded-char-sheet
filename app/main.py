@@ -39,11 +39,14 @@ app.include_router(
     prefix="/auth/jwt",
     tags=["auth"],
 )
-app.include_router(
-    fastapi_users.get_register_router(UserRead, UserCreate),
-    prefix="/auth",
-    tags=["auth"],
-)
+# Conditionally add the register router
+REGISTRATIONS_ENABLED = os.getenv("REGISTRATIONS_ENABLED", "False").lower() == "true"
+if REGISTRATIONS_ENABLED:
+    app.include_router(
+        fastapi_users.get_register_router(UserRead, UserCreate),
+        prefix="/auth",
+        tags=["auth"],
+    )
 app.include_router(
     fastapi_users.get_users_router(UserRead, UserUpdate),
     prefix="/users",
@@ -58,4 +61,7 @@ app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "REGISTRATIONS_ENABLED": REGISTRATIONS_ENABLED
+    })

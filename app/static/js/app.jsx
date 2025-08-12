@@ -378,7 +378,7 @@ function App() {
                     </main>
                 </div>
             ) : (
-                <AuthForm onLogin={handleLogin} onRegister={handleRegister} />
+                <AuthForm onLogin={handleLogin} onRegister={handleRegister} registrationsEnabled={window.REGISTRATIONS_ENABLED} />
             )}
         </>
     );
