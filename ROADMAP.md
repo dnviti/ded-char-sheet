@@ -60,3 +60,4 @@ Post-v1.0, the focus will shift to customization, expansion, and community-drive
 * [ ] Homebrew Content Creator: Allow users to create their own custom content, such as homebrew races, classes, spells, and items, and use it in their character sheets.
 * [ ] Marketplace for Community Content: A platform for users to share and discover homebrew content created by the community.
 * [ ] Advanced API Integrations: Explore integrations with other TTRPG platforms and tools.
+* [ ] 3D Multiplayer with AI-Generated 3D Models: Introduce a 3D multiplayer mode where players can interact with AI-generated 3D models of their characters and the game world.
