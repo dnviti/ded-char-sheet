@@ -43,7 +43,7 @@ const CharacterCard = ({ char, onSelect, onDelete }) => {
                 </button>
             </div>
             <h3 className="font-title text-2xl">{char.name}</h3>
-            <p className="text-parchment mb-4">{char.classLevel} | {char.race}</p>
+            <p className="text-parchment mb-4">{char.className} | {char.race}</p>
             <button onClick={handleSelect} className="theme-dnd-button mt-auto">Load Sheet</button>
         </div>
     );

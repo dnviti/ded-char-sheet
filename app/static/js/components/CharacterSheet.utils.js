@@ -28,7 +28,7 @@ const handleSelectFromAPI = (resourceType, item, setSheetData) => {
         if (resourceType === 'classes') {
             newState.hitDice = blankCharacter.hitDice;
             newState.savingThrows = blankCharacter.savingThrows;
-            newState.classLevel = item.name;
+            newState.className = item.name;
             if (item.hit_dice) {
                 newState.hitDice.total = `1${item.hit_dice.toLowerCase()}`;
             }
