@@ -43,7 +43,7 @@ const handleSelectFromAPI = (resourceType, item, setSheetData) => {
             newState.features = (newState.features ? newState.features + '\n\n' : '') + `**Class Features for ${item.name}:**\n` + item.features?.map(f => `**${f.name}**: ${f.desc}`).join('\n\n');
 
         } else if (resourceType === 'species') {
-            newState.speed = blankCharacter.speed;
+            newState.speed = item.speed ? `${item.speed}ft` : '30ft';
             newState.race = item.name;
             newState.features = (newState.features ? newState.features + '\n\n' : '') + `**Racial Traits for ${item.name}:**\n` + item.traits?.map(t => `**${t.name}**: ${t.desc}`).join('\n\n');
 
