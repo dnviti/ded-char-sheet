@@ -17,3 +17,5 @@ test.db
 # Docker
 Dockerfile
 .dockerignore
+
+user_images/

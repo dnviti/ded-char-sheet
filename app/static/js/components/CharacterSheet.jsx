@@ -81,6 +81,30 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
         debouncedSaveLayout(allLayouts);
     };
 
+    const handleImageUpload = async (file) => {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const response = await fetch(`/api/characters/${character.id}/image`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('Image upload failed');
+            }
+
+            const data = await response.json();
+            setSheetData(prev => ({ ...prev, imageUrl: data.imageUrl }));
+        } catch (error) {
+            console.error('Error uploading image:', error);
+        }
+    };
+
     const handleChange = (path, value) => {
         setSheetData(prev => {
             const keys = path.split('.');
@@ -140,7 +164,7 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
                 </div>
                 <div key="character-portrait">
                     <div className="tile-header"><span>Portrait</span><MagicButton onClick={() => handleGenerate('portrait', `Fantasy character portrait, D&D style. ${sheetData.appearance || `A ${sheetData.race} ${sheetData.className} ${sheetData.level}`}. High quality digital painting, detailed face, fantasy art, cinematic lighting.`, null, generationDeps)} isLoading={isGenerating.portrait} className="py-1 px-2 text-xs">Generate</MagicButton></div>
-                    <div className="tile-content"><CharacterPortrait imageUrl={sheetData.imageUrl}/></div>
+                    <div className="tile-content"><CharacterPortrait imageUrl={sheetData.imageUrl} onImageUpload={handleImageUpload}/></div>
                 </div>
                 <div key="equipment">
                     <div className="tile-header"><span>Equipment</span><SearchableSelect resourceType="equipment" onSelect={handleAddItemToEquipment} placeholder="Add Item..." /></div>

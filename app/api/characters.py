@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, File
+import shutil
+import os
 from ..db import get_collection_characters
 from ..users import User
 from ..auth import current_user
@@ -91,3 +93,32 @@ async def update_character_layout(character_id: str, layout: dict, user: User = 
         raise HTTPException(status_code=404, detail=f"Character with id {character_id} not found.")
 
     return {"message": "Layout updated successfully"}
+
+@router.post("/{character_id}/image")
+async def upload_character_image(character_id: str, image: UploadFile = File(...), user: User = Depends(current_user)):
+    characters_collection = get_collection_characters()
+    character = await characters_collection.find_one({"id": character_id, "user_id": user.id})
+    if character is None:
+        raise HTTPException(status_code=404, detail="Character not found or you don't have permission to edit it.")
+
+    # Create a directory for user-uploaded images if it doesn't exist
+    upload_dir = "app/static/user_images"
+    os.makedirs(upload_dir, exist_ok=True)
+
+    # Sanitize the filename and create a unique path
+    file_extension = os.path.splitext(image.filename)[1]
+    image_filename = f"{character_id}_{user.id}{file_extension}"
+    image_path = os.path.join(upload_dir, image_filename)
+    
+    # Save the uploaded file
+    with open(image_path, "wb") as buffer:
+        shutil.copyfileobj(image.file, buffer)
+
+    # Update the character's imageUrl in the database
+    image_url = f"/static/user_images/{image_filename}"
+    await characters_collection.update_one(
+        {"id": character_id, "user_id": user.id},
+        {"$set": {"imageUrl": image_url}}
+    )
+
+    return {"imageUrl": image_url}
