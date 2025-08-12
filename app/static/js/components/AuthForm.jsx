@@ -1,6 +1,6 @@
 const { useState } = React;
 
-const AuthForm = ({ onLogin, onRegister }) => {
+const AuthForm = ({ onLogin, onRegister, registrationsEnabled }) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isRegister, setIsRegister] = useState(false);
@@ -56,12 +56,14 @@ const AuthForm = ({ onLogin, onRegister }) => {
                     </button>
                 </form>
 
-                <button
-                    onClick={() => { setIsRegister(!isRegister); setError(""); }}
-                    className="w-full mt-6 text-center text-sm text-parchment hover:text-accent-gold transition"
-                >
-                    {isRegister ? "Already have a character? Login" : "New to these lands? Register"}
-                </button>
+                {registrationsEnabled && (
+                    <button
+                        onClick={() => { setIsRegister(!isRegister); setError(""); }}
+                        className="w-full mt-6 text-center text-sm text-parchment hover:text-accent-gold transition"
+                    >
+                        {isRegister ? "Already have a character? Login" : "New to these lands? Register"}
+                    </button>
+                )}
             </div>
         </div>
     );

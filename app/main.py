@@ -39,11 +39,14 @@ app.include_router(
     prefix="/auth/jwt",
     tags=["auth"],
 )
-app.include_router(
-    fastapi_users.get_register_router(UserRead, UserCreate),
-    prefix="/auth",
-    tags=["auth"],
-)
+# Conditionally add the register router
+REGISTRATIONS_ENABLED = os.getenv("REGISTRATIONS_ENABLED", "False").lower() == "true"
+if REGISTRATIONS_ENABLED:
+    app.include_router(
+        fastapi_users.get_register_router(UserRead, UserCreate),
+        prefix="/auth",
+        tags=["auth"],
+    )
 app.include_router(
     fastapi_users.get_users_router(UserRead, UserUpdate),
     prefix="/users",
