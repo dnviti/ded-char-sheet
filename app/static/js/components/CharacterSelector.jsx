@@ -1,13 +1,13 @@
 const { useState } = React;
 
-const FullGeneratorModal = ({ isOpen, onClose, onGenerate, isLoading }) => {
+const FullGeneratorModal = ({ isOpen, onClose, onGenerate, isLoading, status }) => {
     const [prompt, setPrompt] = useState('');
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
             <div className="theme-dnd-card p-8 w-full max-w-lg relative border-4 border-accent-gold shadow-2xl">
-                <button onClick={onClose} className="absolute top-2 right-4 text-parchment hover:text-accent-gold text-4xl font-title">&times;</button>
+                <button onClick={onClose} disabled={isLoading} className="absolute top-2 right-4 text-parchment hover:text-accent-gold text-4xl font-title disabled:opacity-50 disabled:cursor-not-allowed">&times;</button>
                 <h2 className="text-3xl font-title text-center mb-4">Quick AI Creation</h2>
                 <p className="text-parchment text-center mb-6">Describe your character concept (e.g., "a gruff dwarf cleric," "a book-obsessed elf wizard"). The AI will generate a complete level 1 sheet ready for an adventure.</p>
                 <textarea
@@ -16,10 +16,12 @@ const FullGeneratorModal = ({ isOpen, onClose, onGenerate, isLoading }) => {
                     placeholder="E.g.: A half-orc barbarian with a heart of gold..."
                     className="w-full theme-dnd-input mb-4"
                     rows="3"
+                    disabled={isLoading}
                 />
                 <button onClick={() => onGenerate(prompt)} disabled={isLoading} className="w-full theme-dnd-button text-xl py-3">
-                    {isLoading ? 'Forging Hero...' : 'Create my Hero!'}
+                    {isLoading ? status || 'Forging Hero...' : 'Create my Hero!'}
                 </button>
+                 {isLoading && <p className="text-center text-parchment mt-4 text-sm animate-pulse">{status}...</p>}
             </div>
         </div>
     );
@@ -52,17 +54,44 @@ const CharacterCard = ({ char, onSelect, onDelete }) => {
 const CharacterSelector = ({ characters, onSelect, onCreate, onDelete, onFullGenerate }) => {
     const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [generationStatus, setGenerationStatus] = useState('');
 
     const handleGenerate = async (prompt) => {
         setIsGenerating(true);
-        await onFullGenerate(prompt);
-        setIsGenerating(false);
-        setIsGeneratorOpen(false);
+        setGenerationStatus('Starting the creation process...');
+        const newChar = await onFullGenerate(prompt, setGenerationStatus);
+
+        if (newChar) {
+            // Redirect to the new character sheet on success
+            window.location.href = `/character/sheet/${newChar.id}`;
+        } else {
+            // If it fails, stop loading but keep the modal open so the user can see the error and try again.
+            setIsGenerating(false);
+            // The error message itself is displayed via the alert in the API call function
+            // and the final onProgress message in the generation function.
+        }
     };
+    
+    const openModal = () => {
+        setIsGeneratorOpen(true);
+        setIsGenerating(false);
+        setGenerationStatus('');
+    }
+
+    const closeModal = () => {
+        if (isGenerating) return; // Don't close while generating
+        setIsGeneratorOpen(false);
+    }
 
     return (
         <>
-            <FullGeneratorModal isOpen={isGeneratorOpen} onClose={() => setIsGeneratorOpen(false)} onGenerate={handleGenerate} isLoading={isGenerating} />
+            <FullGeneratorModal 
+                isOpen={isGeneratorOpen} 
+                onClose={closeModal} 
+                onGenerate={handleGenerate} 
+                isLoading={isGenerating}
+                status={generationStatus}
+            />
 
             <div className="w-full">
                 <div className="text-center mb-8">
@@ -74,7 +103,7 @@ const CharacterSelector = ({ characters, onSelect, onCreate, onDelete, onFullGen
                     <button onClick={onCreate} className="theme-dnd-button text-lg flex-grow">
                         + Create New Character
                     </button>
-                    <button onClick={() => setIsGeneratorOpen(true)} className="theme-dnd-button text-lg flex-grow">
+                    <button onClick={openModal} className="theme-dnd-button text-lg flex-grow">
                         <i className="fas fa-magic mr-2"></i> Quick AI Creation
                     </button>
                 </div>

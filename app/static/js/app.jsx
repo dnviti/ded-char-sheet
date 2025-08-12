@@ -219,7 +219,7 @@ function App() {
         }
     };
 
-    const handleFullGenerateCharacter = async (concept) => {
+    const handleFullGenerateCharacter = async (concept, onProgress) => {
         console.log("Generating character with concept:", concept);
 
         const schema = {
@@ -253,6 +253,7 @@ function App() {
         };
 
         try {
+            onProgress?.("Fetching game data...");
             // Fetch Open5e data
             const [classes, species, backgrounds] = await Promise.all([
                 fetch('/api/open5e/classes?limit=20').then(res => res.json()),
@@ -280,8 +281,12 @@ function App() {
                 The final output must be only the JSON object, adhering strictly to the schema.
             `;
 
+            onProgress?.("Generating character...");
             const generatedJson = await callGeminiAPI(prompt, schema);
-            if (!generatedJson) return;
+            if (!generatedJson) {
+                onProgress?.("Failed to generate character details.");
+                return null;
+            }
 
             const parsedData = JSON.parse(generatedJson);
             const newChar = {
@@ -291,13 +296,17 @@ function App() {
             };
 
             // Generate portrait
+            onProgress?.("Creating character portrait with AI...");
             const portraitPrompt = `Fantasy character portrait, D&D style. ${newChar.appearance}. High quality digital painting, detailed face, fantasy art, cinematic lighting.`;
             const imageUrl = await callImagenAPI(portraitPrompt);
             if (imageUrl) {
                 newChar.imageUrl = imageUrl;
+            } else {
+                onProgress?.("Portrait generation failed, continuing without one.");
             }
 
             // Save the character
+            onProgress?.("Saving your new hero...");
             const response = await fetch('/api/characters', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -314,9 +323,13 @@ function App() {
             setCharacters(prev => [...prev, savedChar]);
             setSelectedCharacterId(savedChar.id);
             await refreshCurrentUser(); // Refresh user data after character is saved
+            onProgress?.("Done!");
+            return savedChar;
 
         } catch (error) {
             console.error("Full character generation failed:", error);
+            onProgress?.(`An error occurred: ${error.message}`);
+            return null;
         }
     };
 
