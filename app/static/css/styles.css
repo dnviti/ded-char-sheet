@@ -30,6 +30,7 @@ body {
 .react-grid-item {
     transition: all 200ms ease;
     transition-property: left, top;
+    background: transparent;
 }
 .react-grid-item.cssTransforms {
     transition-property: transform;
@@ -76,4 +77,14 @@ body {
     height: 10px;
     border-right: 2px solid var(--accent-red);
     border-bottom: 2px solid var(--accent-red);
+}
+
+.tile-header {
+    font-family: 'MedievalSharp', cursive;
+    font-size: 1.25rem;
+    color: var(--accent-red);
+    cursor: move;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
 }
