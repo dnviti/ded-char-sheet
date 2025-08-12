@@ -67,3 +67,90 @@ body {
 .main-content {
     transition: margin-left .3s;
 }
+
+.react-grid-layout {
+    position: relative;
+    transition: height 200ms ease;
+}
+
+.react-grid-item {
+    background-color: var(--bg-wood-light);
+    color: var(--text-light);
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Prevent content from spilling out */
+    transition: all 200ms ease;
+    transition-property: left, top;
+}
+
+.react-grid-item.cssTransforms {
+    transition-property: transform;
+}
+
+.react-grid-item.resizing {
+    z-index: 1;
+    will-change: width, height;
+}
+
+.react-grid-item.react-draggable-dragging {
+    transition: none;
+    z-index: 3;
+    will-change: transform;
+}
+
+.react-grid-item.react-grid-placeholder {
+    background: var(--accent-red);
+    opacity: 0.2;
+    transition-duration: 100ms;
+    z-index: 2;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+.react-grid-item > .react-resizable-handle {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    bottom: 0;
+    right: 0;
+    background: none;
+    cursor: se-resize;
+    z-index: 10; /* Ensure handle is on top */
+}
+
+.react-grid-item > .react-resizable-handle::after {
+    content: "";
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    width: 10px;
+    height: 10px;
+    border-right: 2px solid var(--accent-red);
+    border-bottom: 2px solid var(--accent-red);
+}
+
+.tile-header {
+    font-family: 'MedievalSharp', cursive;
+    font-size: 1.25rem;
+    color: var(--accent-gold);
+    cursor: move;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.tile-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1rem;
+}
