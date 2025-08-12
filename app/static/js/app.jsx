@@ -421,7 +421,7 @@ function App() {
                         ) : !selectedCharacter ? (
                             <CharacterSelector characters={characters} onSelect={handleSelectCharacter} onCreate={handleCreateCharacter} onDelete={handleDeleteCharacter} onFullGenerate={handleFullGenerateCharacter} />
                         ) : (
-                            <CharacterSheet character={selectedCharacter} onUpdate={handleUpdateCharacter} onBack={handleBackToSelector} callGeminiAPI={callGeminiAPI} callImagenAPI={callImagenAPI} />
+                            <CharacterSheet user={currentUser} character={selectedCharacter} onUpdate={handleUpdateCharacter} onBack={handleBackToSelector} callGeminiAPI={callGeminiAPI} callImagenAPI={callImagenAPI} />
                         )}
                     </main>
                 </div>
