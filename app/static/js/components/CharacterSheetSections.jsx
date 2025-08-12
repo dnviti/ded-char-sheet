@@ -1,7 +1,7 @@
 const { useState, useEffect, useCallback, useRef } = React;
 
 // --- Components from UI.jsx ---
-// ThemedSection, ThemedAbilityScore, ThemedStatBox, ThemedTextArea, MagicButton
+// ThemedAbilityScore, ThemedStatBox, ThemedTextArea, MagicButton
 
 // --- Helper Functions (assuming they are globally available or imported) ---
 // getModifier, SKILL_NAMES, SAVING_THROW_NAMES
@@ -81,18 +81,16 @@ const AbilityScores = ({ scores, onUpdate }) => {
     };
 
     return (
-        <ThemedSection title="Ability Scores">
-            <div className="grid grid-cols-3 md:grid-cols-3 gap-2">
-                {Object.entries(scores).map(([key, value]) => (
-                    <ThemedAbilityScore
-                        key={key}
-                        label={key.substring(0, 3).toUpperCase()}
-                        score={value}
-                        onUpdate={(newValue) => handleChange(key, newValue)}
-                    />
-                ))}
-            </div>
-        </ThemedSection>
+        <div className="grid grid-cols-3 md:grid-cols-3 gap-2">
+            {Object.entries(scores).map(([key, value]) => (
+                <ThemedAbilityScore
+                    key={key}
+                    label={key.substring(0, 3).toUpperCase()}
+                    score={value}
+                    onUpdate={(newValue) => handleChange(key, newValue)}
+                />
+            ))}
+        </div>
     );
 };
 
@@ -103,34 +101,32 @@ const SavingThrows = ({ savingThrows, abilityScores, proficiencyBonus, onUpdate 
     };
 
     return (
-        <ThemedSection title="Saving Throws">
-            <ul className="space-y-2">
-                {Object.entries(savingThrows).map(([key, { proficient }]) => {
-                    const modifier = getModifier(abilityScores[key]);
-                    const bonus = proficient ? modifier + proficiencyBonus : modifier;
-                    return (
-                        <li key={key} className="flex items-center justify-between p-2 rounded-md bg-wood-light">
-                            <div className="flex items-center">
-                                <input
-                                    type="checkbox"
-                                    checked={proficient}
-                                    onChange={(e) => handleChange(key, e.target.checked)}
-                                    className="form-checkbox h-4 w-4 text-accent-gold bg-transparent border-parchment rounded focus:ring-accent-gold"
-                                />
-                                <span className="ml-3 font-bold text-sm uppercase">{SAVING_THROW_NAMES[key]}</span>
-                            </div>
-                            <span className="font-mono text-lg">{bonus >= 0 ? `+${bonus}` : bonus}</span>
-                        </li>
-                    );
-                })}
-            </ul>
-        </ThemedSection>
+        <ul className="space-y-2">
+            {Object.entries(savingThrows).map(([key, { proficient }]) => {
+                const modifier = getModifier(abilityScores[key]);
+                const bonus = proficient ? modifier + proficiencyBonus : modifier;
+                return (
+                    <li key={key} className="flex items-center justify-between p-2 rounded-md bg-wood-dark">
+                        <div className="flex items-center">
+                            <input
+                                type="checkbox"
+                                checked={proficient}
+                                onChange={(e) => handleChange(key, e.target.checked)}
+                                className="form-checkbox h-4 w-4 text-accent-gold bg-transparent border-parchment rounded focus:ring-accent-gold"
+                            />
+                            <span className="ml-3 font-bold text-sm uppercase">{SAVING_THROW_NAMES[key]}</span>
+                        </div>
+                        <span className="font-mono text-lg">{bonus >= 0 ? `+${bonus}` : bonus}</span>
+                    </li>
+                );
+            })}
+        </ul>
     );
 };
 
 const CombatStats = ({ ac, initiative, speed, hp, onUpdate }) => {
     return (
-        <ThemedSection title="Combat">
+        <>
             <div className="grid grid-cols-3 gap-4 text-center">
                 <ThemedStatBox label="Armor Class" value={ac} onUpdate={(val) => onUpdate('armorClass', val)} editable />
                 <ThemedStatBox label="Initiative" value={initiative > 0 ? `+${initiative}`: initiative} />
@@ -151,45 +147,40 @@ const CombatStats = ({ ac, initiative, speed, hp, onUpdate }) => {
                     {/* Death Saves implementation needed */}
                  </div>
             </div>
-        </ThemedSection>
+        </>
     );
 };
 
 
 const Attacks = ({ equipment, onUpdate }) => (
-    <ThemedSection title="Attacks & Spellcasting">
-        <ThemedTextArea
-            label="Attacks"
-            value={equipment}
-            onChange={(e) => onUpdate(e.target.value)}
-            rows={8}
-            placeholder="Describe your attacks..."
-        />
-    </ThemedSection>
+    <ThemedTextArea
+        value={equipment}
+        onChange={(e) => onUpdate(e.target.value)}
+        rows={8}
+        placeholder="List your weapons, attacks, and cantrips here..."
+    />
 );
 
-const CharacterPortrait = ({ imageUrl, isGenerating, onGenerate }) => (
-    <ThemedSection title="Character Portrait" actions={<MagicButton onClick={onGenerate} isLoading={isGenerating}>Generate Portrait</MagicButton>}>
-        <div className="flex items-center justify-center h-64 bg-wood-dark rounded-md overflow-hidden">
-            {imageUrl ? (
-                <img src={imageUrl} alt="Character Portrait" className="w-full h-full object-cover" />
-            ) : (
-                <div className="text-center text-parchment">
-                    <p>No portrait yet.</p>
-                    <p className="text-xs">Click the ✨ button to generate one!</p>
-                </div>
-            )}
-        </div>
-    </ThemedSection>
+const CharacterPortrait = ({ imageUrl }) => (
+    <div className="flex items-center justify-center h-full bg-wood-dark rounded-md overflow-hidden">
+        {imageUrl ? (
+            <img src={imageUrl} alt="Character Portrait" className="w-full h-full object-cover" />
+        ) : (
+            <div className="text-center">
+                <p>No portrait yet.</p>
+                <p className="text-xs">Use the ✨ button to generate one!</p>
+            </div>
+        )}
+    </div>
 );
 
 
-const Equipment = ({ equipment, currency, onUpdate, onAddItem }) => {
+const Equipment = ({ equipment, currency, onUpdate }) => {
      const handleCurrencyChange = (key, value) => {
         onUpdate(`currency.${key}`, parseInt(value) || 0);
     };
     return (
-        <ThemedSection title="Equipment" actions={<SearchableSelect resourceType="equipment" onSelect={onAddItem} placeholder="Add Item..." />}>
+        <>
             <div className="grid grid-cols-5 gap-2 mb-4">
                  {Object.entries(currency).map(([key, value]) => (
                     <div key={key} className="flex flex-col items-center">
@@ -204,7 +195,7 @@ const Equipment = ({ equipment, currency, onUpdate, onAddItem }) => {
                 rows={10}
                 placeholder="List your equipment..."
             />
-        </ThemedSection>
+        </>
     );
 };
 
@@ -215,61 +206,57 @@ const Skills = ({ skills, abilityScores, proficiencyBonus, onUpdate }) => {
     };
 
     return (
-        <ThemedSection title="Skills">
-            <ul className="space-y-2 text-sm">
-                {Object.entries(skills).map(([key, { proficient }]) => {
-                    const skillInfo = SKILL_NAMES[key];
-                    const modifier = getModifier(abilityScores[skillInfo.ability]);
-                    const bonus = proficient ? modifier + proficiencyBonus : modifier;
-                    return (
-                         <li key={key} className="flex items-center justify-between p-2 rounded-md bg-wood-light">
-                            <div className="flex items-center">
-                                <input
-                                    type="checkbox"
-                                    checked={proficient}
-                                    onChange={(e) => handleChange(key, e.target.checked)}
-                                    className="form-checkbox h-4 w-4 text-accent-gold bg-transparent border-parchment rounded focus:ring-accent-gold"
-                                />
-                                <span className="ml-2 w-32 font-bold">{skillInfo.name}</span>
-                                <span className="text-xs text-parchment">({skillInfo.ability.substring(0,3).toUpperCase()})</span>
-                            </div>
-                            <span className="font-mono text-lg">{bonus >= 0 ? `+${bonus}` : bonus}</span>
-                        </li>
-                    );
-                })}
-            </ul>
-        </ThemedSection>
+        <ul className="space-y-2 text-sm">
+            {Object.entries(skills).map(([key, { proficient }]) => {
+                const skillInfo = SKILL_NAMES[key];
+                const modifier = getModifier(abilityScores[skillInfo.ability]);
+                const bonus = proficient ? modifier + proficiencyBonus : modifier;
+                return (
+                     <li key={key} className="flex items-center justify-between p-2 rounded-md bg-wood-dark">
+                        <div className="flex items-center">
+                            <input
+                                type="checkbox"
+                                checked={proficient}
+                                onChange={(e) => handleChange(key, e.target.checked)}
+                                className="form-checkbox h-4 w-4 text-accent-gold bg-transparent border-parchment rounded focus:ring-accent-gold"
+                            />
+                            <span className="ml-2 w-32 font-bold">{skillInfo.name}</span>
+                            <span className="text-xs">({skillInfo.ability.substring(0,3).toUpperCase()})</span>
+                        </div>
+                        <span className="font-mono text-lg">{bonus >= 0 ? `+${bonus}` : bonus}</span>
+                    </li>
+                );
+            })}
+        </ul>
     );
 };
 
-const CharacterBackground = ({ data, isGenerating, onGenerate, onUpdate }) => (
-    <ThemedSection title="Character Background" actions={<MagicButton onClick={onGenerate} isLoading={isGenerating}>Generate Details</MagicButton>}>
-        <ThemedTextArea label="Personality Traits" value={data.personalityTraits} onChange={e => onUpdate('personalityTraits', e.target.value)} disabled={isGenerating} />
-        <ThemedTextArea label="Ideals" value={data.ideals} onChange={e => onUpdate('ideals', e.target.value)} disabled={isGenerating} />
-        <ThemedTextArea label="Bonds" value={data.bonds} onChange={e => onUpdate('bonds', e.target.value)} disabled={isGenerating} />
-        <ThemedTextArea label="Flaws" value={data.flaws} onChange={e => onUpdate('flaws', e.target.value)} disabled={isGenerating} />
-    </ThemedSection>
+const CharacterBackground = ({ data, onUpdate }) => (
+    <>
+        <ThemedTextArea label="Personality Traits" value={data.personalityTraits} onChange={e => onUpdate('personalityTraits', e.target.value)} />
+        <ThemedTextArea label="Ideals" value={data.ideals} onChange={e => onUpdate('ideals', e.target.value)} />
+        <ThemedTextArea label="Bonds" value={data.bonds} onChange={e => onUpdate('bonds', e.target.value)} />
+        <ThemedTextArea label="Flaws" value={data.flaws} onChange={e => onUpdate('flaws', e.target.value)} />
+    </>
 );
 
 const FeaturesTraits = ({ features, onUpdate }) => (
-    <ThemedSection title="Features & Traits">
-        <ThemedTextArea
-            value={features}
-            onChange={(e) => onUpdate(e.target.value)}
-            rows={15}
-            placeholder="List your features and traits..."
-        />
-    </ThemedSection>
+    <ThemedTextArea
+        value={features}
+        onChange={(e) => onUpdate(e.target.value)}
+        rows={15}
+        placeholder="List your features and traits..."
+    />
 );
 
-const Spells = ({ spellcasting, abilityScores, proficiencyBonus, onUpdate, onAddSpell, onUpdateLevel }) => {
+const Spells = ({ spellcasting, abilityScores, proficiencyBonus, onUpdate, onUpdateLevel }) => {
     const { ability, cantrips, levels } = spellcasting;
     const spellcastingAbilityModifier = getModifier(abilityScores[ability] || 10);
     const spellSaveDC = 8 + proficiencyBonus + spellcastingAbilityModifier;
     const spellAttackBonus = proficiencyBonus + spellcastingAbilityModifier;
 
     return (
-        <ThemedSection title="Spellcasting" actions={<SearchableSelect resourceType="spells" onSelect={onAddSpell} placeholder="Add Spell..." />}>
+        <>
             <div className="grid grid-cols-3 gap-4 text-center mb-4">
                 <ThemedStatBox label="Spellcasting Ability" value={ability.toUpperCase()} />
                 <ThemedStatBox label="Spell Save DC" value={spellSaveDC} />
@@ -281,7 +268,7 @@ const Spells = ({ spellcasting, abilityScores, proficiencyBonus, onUpdate, onAdd
                 <h3 className="font-title text-lg text-accent-gold mb-2">Cantrips</h3>
                 <ul className="space-y-1">
                     {cantrips.map((spell, index) => (
-                        <li key={index} className="p-2 bg-wood-light rounded-md">{spell.name}</li>
+                        <li key={index} className="p-2 bg-wood-dark rounded-md">{spell.name}</li>
                     ))}
                 </ul>
             </div>
@@ -301,13 +288,13 @@ const Spells = ({ spellcasting, abilityScores, proficiencyBonus, onUpdate, onAdd
                             </div>
                             <ul className="space-y-1">
                                 {level.spells.map((spell, spellIndex) => (
-                                    <li key={spellIndex} className="p-2 bg-wood-light rounded-md">{spell.name}</li>
+                                    <li key={spellIndex} className="p-2 bg-wood-dark rounded-md">{spell.name}</li>
                                 ))}
                             </ul>
                         </div>
                     );
                 })}
             </div>
-        </ThemedSection>
+        </>
     );
 };

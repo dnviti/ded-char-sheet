@@ -19,12 +19,12 @@ body {
 }
 
 .react-grid-item {
-    background-color: var(--bg-parchment);
-    color: var(--text-dark);
+    background-color: var(--bg-wood-light);
+    color: var(--text-light);
     border: 2px solid var(--border-color);
-    border-radius: 3px;
+    border-radius: 4px;
     padding: 1rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.6);
     overflow: auto;
     transition: all 200ms ease;
     transition-property: left, top;
@@ -81,9 +81,12 @@ body {
 .tile-header {
     font-family: 'MedievalSharp', cursive;
     font-size: 1.25rem;
-    color: var(--accent-red);
+    color: var(--accent-gold);
     cursor: move;
     padding-bottom: 0.5rem;
     margin-bottom: 0.5rem;
     border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }

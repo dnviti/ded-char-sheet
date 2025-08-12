@@ -16,18 +16,6 @@ const ThemedButton = ({ children, onClick, className = '', disabled = false, var
     );
 };
 
-const ThemedSection = ({ title, children, className = '', actions }) => (
-    <div className={`theme-dnd-card p-4 ${className}`}>
-        <div className="flex justify-between items-center mb-3 border-b-2 border-theme pb-2">
-            <h2 className="text-2xl font-title">{title}</h2>
-            {actions && <div className="flex-shrink-0 print:hidden">{actions}</div>}
-        </div>
-        <div className="space-y-4">
-            {children}
-        </div>
-    </div>
-);
-
 const MagicButton = ({ onClick, isLoading, children, className = '' }) => (
     <ThemedButton onClick={onClick} disabled={isLoading} className={`bg-purple-700 border-purple-400 hover:bg-purple-500 ${className}`}>
         <span className="flex items-center justify-center space-x-2">
