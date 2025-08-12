@@ -360,12 +360,14 @@ function App() {
                     <header className="bg-wood-light border-b-4 border-theme p-4 flex justify-between items-center shadow-lg print:hidden">
                         <h1 className="text-3xl font-title">Character Keep</h1>
                         <div className="flex items-center">
+                            {currentUser.is_superuser && (
+                                <a href="/admin" className="theme-dnd-button mr-4">Admin</a>
+                            )}
                             <span className="mr-4 text-parchment hidden sm:inline">{currentUser.email}</span>
                             <button onClick={handleLogout} className="theme-dnd-button">Logout</button>
                         </div>
                     </header>
                     <main className="p-4 md:p-8">
-                        {currentUser.is_superuser && <AdminDashboard />}
                         {loading ? (
                              <div className="flex flex-col items-center justify-center p-4">
                                 <h1 className="text-4xl font-title">Loading Heroes...</h1>

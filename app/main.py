@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -61,7 +61,9 @@ app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
-    return templates.TemplateResponse("index.html", {
-        "request": request,
-        "REGISTRATIONS_ENABLED": REGISTRATIONS_ENABLED
-    })
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
+@app.get("/admin", response_class=HTMLResponse)
+async def read_admin(request: Request, user: User = Depends(fastapi_users.current_user(active=True, superuser=True))):
+    return templates.TemplateResponse("admin.html", {"request": request})
