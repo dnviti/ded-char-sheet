@@ -134,7 +134,7 @@ const CombatStats = ({ ac, initiative, speed, hp, onUpdate }) => {
             <div className="grid grid-cols-3 gap-4 text-center">
                 <ThemedStatBox label="Armor Class" value={ac} onUpdate={(val) => onUpdate('armorClass', val)} editable />
                 <ThemedStatBox label="Initiative" value={initiative > 0 ? `+${initiative}`: initiative} />
-                <ThemedStatBox label="Speed" value={speed} onUpdate={(val) => onUpdate('speed', val)} editable />
+                <ThemedTextBox label="Speed" value={speed} onUpdate={(val) => onUpdate('speed', val)} editable />
             </div>
             <div className="mt-4">
                  <h3 className="font-title text-lg text-accent-gold text-center mb-2">Hit Points</h3>

@@ -67,6 +67,22 @@ const ThemedStatBox = ({ label, value, onUpdate, className = "", editable = fals
     </div>
 );
 
+const ThemedTextBox = ({ label, value, onUpdate, className = "", editable = false }) => (
+    <div className={`theme-dnd-card items-center justify-center p-2 bg-wood-light border-2 border-theme ${className}`}>
+        {editable ? (
+            <input
+                type="text"
+                value={value}
+                onChange={e => onUpdate(e.target.value || "")}
+                className="w-full text-3xl font-title text-center bg-transparent focus:outline-none text-white"
+            />
+        ) : (
+            <div className="text-3xl font-title text-white">{value}</div>
+        )}
+        <label className="text-xs font-bold text-accent-gold text-center uppercase tracking-wider">{label}</label>
+    </div>
+);
+
 const ThemedTextArea = ({ label, value, onChange, placeholder, className = "", rows = 3, disabled = false }) => (
      <div className={`flex flex-col ${className}`}>
         {label && <label className="text-sm font-title text-accent-gold mb-1">{label}</label>}

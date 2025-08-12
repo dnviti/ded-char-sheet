@@ -243,7 +243,7 @@ function App() {
             required: ["name", "className", "level", "race", "background", "alignment", "abilityScores", "appearance", "personalityTraits", "ideals", "bonds", "flaws"],
         };
 
-        const prompt = `You are a D&D expert. Generate a complete level 1 character sheet based on this concept: "${concept}". Follow the provided JSON schema precisely.`;
+        const prompt = `You are a D&D expert. Generate a complete character sheet based on this concept: "${concept}". Follow the provided JSON schema precisely.`;
 
         try {
             const generatedJson = await callGeminiAPI(prompt, schema);
