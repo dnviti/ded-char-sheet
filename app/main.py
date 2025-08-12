@@ -7,6 +7,7 @@ from beanie import init_beanie
 from bson import ObjectId
 from beanie import PydanticObjectId
 from fastapi.encoders import ENCODERS_BY_TYPE
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from .db import connect_to_mongo, close_mongo_connection, get_database
 from .users import User, UserRead, UserCreate, UserUpdate
@@ -18,6 +19,9 @@ ENCODERS_BY_TYPE[PydanticObjectId] = str
 ENCODERS_BY_TYPE[ObjectId] = str
 
 app = FastAPI()
+
+# Add middleware for handling proxy headers
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=["*"])
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
