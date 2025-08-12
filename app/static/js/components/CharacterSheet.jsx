@@ -25,6 +25,11 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         if (file) {
+            // Check file size (2MB limit)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Image file must be smaller than 2MB.');
+                return;
+            }
             handleImageUpload(file);
         }
     };
@@ -94,27 +99,33 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
     };
 
     const handleImageUpload = async (file) => {
-        const formData = new FormData();
-        formData.append('image', file);
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = async () => {
+            const base64Image = reader.result;
+            try {
+                const response = await fetch(`/api/characters/${character.id}/image`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({ image: base64Image })
+                });
 
-        try {
-            const response = await fetch(`/api/characters/${character.id}/image`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: formData
-            });
+                if (!response.ok) {
+                    throw new Error('Image upload failed');
+                }
 
-            if (!response.ok) {
-                throw new Error('Image upload failed');
+                const data = await response.json();
+                setSheetData(prev => ({ ...prev, imageUrl: data.imageUrl }));
+            } catch (error) {
+                console.error('Error uploading image:', error);
             }
-
-            const data = await response.json();
-            setSheetData(prev => ({ ...prev, imageUrl: data.imageUrl }));
-        } catch (error) {
-            console.error('Error uploading image:', error);
-        }
+        };
+        reader.onerror = (error) => {
+            console.error('Error reading file:', error);
+        };
     };
 
     const handleChange = (path, value) => {
