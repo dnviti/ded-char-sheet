@@ -3,6 +3,15 @@ const ResponsiveGridLayout = ReactGridLayout.Responsive;
 const WidthProvider = ReactGridLayout.WidthProvider;
 const Responsive = WidthProvider(ResponsiveGridLayout);
 
+const debounce = (func, delay) => {
+    let timeout;
+    return function(...args) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), delay);
+    };
+};
+
 // Main component remains the same for logic
 const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagenAPI, user }) => {
     const [sheetData, setSheetData] = useState(character);
@@ -13,11 +22,7 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
         setSheetData(character);
     }, [character]);
 
-    const handleLayoutChange = (layout, allLayouts) => {
-        setLayouts(allLayouts);
-    };
-
-    const handleSaveLayout = async (layout, allLayouts) => {
+    const saveLayout = async (layoutsToSave) => {
         try {
             const response = await fetch('/api/users/me/layout', {
                 method: 'PUT',
@@ -25,14 +30,23 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
-                body: JSON.stringify(allLayouts)
+                body: JSON.stringify(layoutsToSave)
             });
             if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Failed to save layout:', errorText);
                 throw new Error('Failed to save layout');
             }
         } catch (error) {
             console.error('Error saving layout:', error);
         }
+    };
+
+    const debouncedSaveLayout = useCallback(debounce(saveLayout, 1000), []);
+
+    const handleLayoutChange = (layout, allLayouts) => {
+        setLayouts(allLayouts);
+        debouncedSaveLayout(allLayouts);
     };
 
     const handleChange = (path, value) => {
@@ -111,7 +125,7 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
                 onSelectAPI={(resourceType, item) => handleSelectFromAPI(resourceType, item, setSheetData)}
                 onSave={() => {
                     handleSave();
-                    handleSaveLayout();
+                    saveLayout(layouts);
                 }}
             />
 
@@ -123,8 +137,6 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
                 cols={{ lg: 3, md: 2, sm: 1, xs: 1, xxs: 1 }}
                 rowHeight={100}
                 onLayoutChange={handleLayoutChange}
-                onDragStop={handleSaveLayout}
-                onResizeStop={handleSaveLayout}
                 draggableHandle=".tile-header"
             >
                 <div key="ability-scores" className="themed-box">
