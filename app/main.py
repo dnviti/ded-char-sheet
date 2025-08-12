@@ -61,7 +61,13 @@ app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "REGISTRATIONS_ENABLED": REGISTRATIONS_ENABLED,
+        },
+    )
 
 
 @app.get("/admin", response_class=HTMLResponse)
