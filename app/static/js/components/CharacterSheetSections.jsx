@@ -8,21 +8,22 @@ const { useState, useEffect, useCallback, useRef } = React;
 
 const SheetHeader = ({
     name, className, level, race, background, alignment, playerName, experience,
-    onBack, onUpdate, onSelectAPI
+    onBack, onUpdate, onSelectAPI, onSave
 }) => {
     return (
         <div className="bg-wood-dark p-4 rounded-lg shadow-lg border-2 border-theme mb-6 print:hidden">
-            <div className="flex justify-between items-start">
-                <div className="flex-grow">
+            <div className="flex justify-between items-center">
+                <button onClick={onBack} className="theme-dnd-button">Back</button>
+                <div className="flex-grow mx-4">
                     <input
                         type="text"
                         value={name}
                         onChange={(e) => onUpdate('name', e.target.value)}
-                        className="text-5xl font-title bg-transparent border-b-2 border-transparent focus:border-accent-gold focus:outline-none w-full"
+                        className="text-5xl font-title bg-transparent border-b-2 border-transparent focus:border-accent-gold focus:outline-none w-full text-center"
                         placeholder="Character Name"
                     />
                 </div>
-                <button onClick={onBack} className="theme-dnd-button-sm ml-4 print:hidden">&larr; Back</button>
+                <button onClick={onSave} className="theme-dnd-button">Save Character</button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-3 mt-4 text-sm">
