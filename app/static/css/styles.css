@@ -17,6 +17,7 @@ body {
     position: relative;
     transition: height 200ms ease;
 }
+
 .react-grid-item {
     background-color: var(--bg-parchment);
     color: var(--text-dark);
@@ -28,9 +29,11 @@ body {
     transition: all 200ms ease;
     transition-property: left, top;
 }
+
 .react-grid-item.cssTransforms {
     transition-property: transform;
 }
+
 .react-grid-item.resizing {
     z-index: 1;
     will-change: width, height;
