@@ -7,17 +7,17 @@ const Responsive = WidthProvider(ResponsiveGridLayout);
 const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagenAPI, user }) => {
     const [sheetData, setSheetData] = useState(character);
     const [isGenerating, setIsGenerating] = useState({ appearance: false, background: false, portrait: false, hook: false });
-    const [layout, setLayout] = useState(user.character_sheet_layout || []);
+    const [layouts, setLayouts] = useState(user.character_sheet_layout || {});
 
     useEffect(() => {
         setSheetData(character);
     }, [character]);
 
-    const handleLayoutChange = (layout) => {
-        setLayout(layout);
+    const handleLayoutChange = (layout, allLayouts) => {
+        setLayouts(allLayouts);
     };
 
-    const handleSaveLayout = async () => {
+    const handleSaveLayout = async (layout, allLayouts) => {
         try {
             const response = await fetch('/api/users/me/layout', {
                 method: 'PUT',
@@ -25,7 +25,7 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
-                body: JSON.stringify(layout)
+                body: JSON.stringify(allLayouts)
             });
             if (!response.ok) {
                 throw new Error('Failed to save layout');
@@ -118,11 +118,13 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
             {/* --- Main Content --- */}
             <Responsive
                 className="layout"
-                layouts={{ lg: layout.length > 0 ? layout : initialLayout }}
+                layouts={Object.keys(layouts).length > 0 ? layouts : { lg: initialLayout }}
                 breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
                 cols={{ lg: 3, md: 2, sm: 1, xs: 1, xxs: 1 }}
                 rowHeight={100}
                 onLayoutChange={handleLayoutChange}
+                onDragStop={handleSaveLayout}
+                onResizeStop={handleSaveLayout}
             >
                 <div key="ability-scores" className="themed-box">
                     <AbilityScores scores={sheetData.abilityScores} onUpdate={handleChange} />
