@@ -1,14 +1,39 @@
 const { useState, useEffect, useCallback, useRef } = React;
+const ResponsiveGridLayout = ReactGridLayout.Responsive;
+const WidthProvider = ReactGridLayout.WidthProvider;
+const Responsive = WidthProvider(ResponsiveGridLayout);
 
 // Main component remains the same for logic
-const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagenAPI }) => {
+const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagenAPI, user }) => {
     const [sheetData, setSheetData] = useState(character);
-    const [activeTab, setActiveTab] = useState('main');
     const [isGenerating, setIsGenerating] = useState({ appearance: false, background: false, portrait: false, hook: false });
+    const [layout, setLayout] = useState(user.character_sheet_layout || []);
 
     useEffect(() => {
         setSheetData(character);
     }, [character]);
+
+    const handleLayoutChange = (layout) => {
+        setLayout(layout);
+    };
+
+    const handleSaveLayout = async () => {
+        try {
+            const response = await fetch('/api/users/me/layout', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(layout)
+            });
+            if (!response.ok) {
+                throw new Error('Failed to save layout');
+            }
+        } catch (error) {
+            console.error('Error saving layout:', error);
+        }
+    };
 
     const handleChange = (path, value) => {
         setSheetData(prev => {
@@ -54,6 +79,20 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
         onUpdate(sheetData);
     };
 
+    const initialLayout = [
+        { i: 'ability-scores', x: 0, y: 0, w: 1, h: 2 },
+        { i: 'inspiration-prof-perc', x: 0, y: 2, w: 1, h: 1 },
+        { i: 'saving-throws', x: 0, y: 3, w: 1, h: 2 },
+        { i: 'combat-stats', x: 1, y: 0, w: 1, h: 2 },
+        { i: 'attacks', x: 1, y: 2, w: 1, h: 1 },
+        { i: 'character-portrait', x: 1, y: 3, w: 1, h: 2 },
+        { i: 'equipment', x: 1, y: 5, w: 1, h: 2 },
+        { i: 'skills', x: 2, y: 0, w: 1, h: 3 },
+        { i: 'character-background', x: 2, y: 3, w: 1, h: 2 },
+        { i: 'features-traits', x: 2, y: 5, w: 1, h: 2 },
+        { i: 'spells', x: 0, y: 7, w: 3, h: 3 },
+    ];
+
     // --- RENDER ---
     return (
         <div id="character-sheet-printable">
@@ -70,25 +109,35 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
                 onBack={onBack}
                 onUpdate={handleChange}
                 onSelectAPI={(resourceType, item) => handleSelectFromAPI(resourceType, item, setSheetData)}
-                onSave={handleSave}
+                onSave={() => {
+                    handleSave();
+                    handleSaveLayout();
+                }}
             />
 
             {/* --- Main Content --- */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-
-                {/* --- Column 1: Core Stats & Portrait --- */}
-                <div className="space-y-6">
+            <Responsive
+                className="layout"
+                layouts={{ lg: layout.length > 0 ? layout : initialLayout }}
+                breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+                cols={{ lg: 3, md: 2, sm: 1, xs: 1, xxs: 1 }}
+                rowHeight={100}
+                onLayoutChange={handleLayoutChange}
+            >
+                <div key="ability-scores" className="themed-box">
                     <AbilityScores scores={sheetData.abilityScores} onUpdate={handleChange} />
+                </div>
+                <div key="inspiration-prof-perc" className="themed-box">
                     <div className="grid grid-cols-3 gap-2 text-center">
                         <ThemedStatBox label="Inspiration" value={sheetData.inspiration} onUpdate={(val) => handleChange('inspiration', val)} editable />
                         <ThemedStatBox label="Prof. Bonus" value={`+${sheetData.proficiencyBonus}`} />
                         <ThemedStatBox label="Passive Percep." value={passivePerception} />
                     </div>
+                </div>
+                <div key="saving-throws" className="themed-box">
                     <SavingThrows savingThrows={sheetData.savingThrows} abilityScores={sheetData.abilityScores} proficiencyBonus={sheetData.proficiencyBonus} onUpdate={handleChange} />
                 </div>
-
-                {/* --- Column 2: Combat & Character Info --- */}
-                <div className="space-y-6">
+                <div key="combat-stats" className="themed-box">
                     <CombatStats
                         ac={sheetData.armorClass}
                         initiative={getModifier(sheetData.abilityScores.dexterity)}
@@ -96,12 +145,18 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
                         hp={sheetData}
                         onUpdate={handleChange}
                     />
+                </div>
+                <div key="attacks" className="themed-box">
                     <Attacks equipment={sheetData.equipment} onUpdate={(val) => handleChange('equipment', val)} />
+                </div>
+                <div key="character-portrait" className="themed-box">
                     <CharacterPortrait
                         imageUrl={sheetData.imageUrl}
                         isGenerating={isGenerating.portrait}
                         onGenerate={() => handleGenerate('portrait', `Fantasy character portrait, D&D style. ${sheetData.appearance || `A ${sheetData.race} ${sheetData.className} ${sheetData.level}`}. High quality digital painting, detailed face, fantasy art, cinematic lighting.`, null, generationDeps)}
                     />
+                </div>
+                <div key="equipment" className="themed-box">
                     <Equipment
                         equipment={sheetData.equipment}
                         currency={sheetData.currency}
@@ -109,30 +164,31 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
                         onAddItem={handleAddItemToEquipment}
                     />
                 </div>
-
-                {/* --- Column 3: Skills & Features --- */}
-                <div className="space-y-6">
+                <div key="skills" className="themed-box">
                     <Skills skills={sheetData.skills} abilityScores={sheetData.abilityScores} proficiencyBonus={sheetData.proficiencyBonus} onUpdate={handleChange} />
+                </div>
+                <div key="character-background" className="themed-box">
                     <CharacterBackground
                         data={sheetData}
                         isGenerating={isGenerating.background}
                         onGenerate={() => handleGenerate('background', `Generate a personality trait, an ideal, a bond, and a flaw for a ${sheetData.race} ${sheetData.className} ${sheetData.level} with a "${sheetData.background}" background.`, { type: "OBJECT", properties: { personalityTraits: { type: "STRING" }, ideals: { type: "STRING" }, bonds: { type: "STRING" }, flaws: { type: "STRING" } }, required: ["personalityTraits", "ideals", "bonds", "flaws"] }, generationDeps)}
                         onUpdate={handleChange}
                     />
+                </div>
+                <div key="features-traits" className="themed-box">
                     <FeaturesTraits features={sheetData.features} onUpdate={(val) => handleChange('features', val)} />
                 </div>
-            </div>
-             {/* --- Spells Section (Full Width) --- */}
-            <div className="mt-6">
-                <Spells
-                    spellcasting={sheetData.spellcasting}
-                    abilityScores={sheetData.abilityScores}
-                    proficiencyBonus={sheetData.proficiencyBonus}
-                    onUpdate={handleChange}
-                    onAddSpell={handleAddSpellFromSearch}
-                    onUpdateLevel={handleSpellcastingChange}
-                />
-            </div>
+                <div key="spells" className="themed-box">
+                    <Spells
+                        spellcasting={sheetData.spellcasting}
+                        abilityScores={sheetData.abilityScores}
+                        proficiencyBonus={sheetData.proficiencyBonus}
+                        onUpdate={handleChange}
+                        onAddSpell={handleAddSpellFromSearch}
+                        onUpdateLevel={handleSpellcastingChange}
+                    />
+                </div>
+            </Responsive>
         </div>
     );
 };

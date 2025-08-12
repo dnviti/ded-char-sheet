@@ -8,10 +8,12 @@ from fastapi_users.db import BeanieBaseUser, BeanieUserDatabase
 class User(BeanieBaseUser, Document):
     package: Optional[str] = "free"
     generation_count: Optional[int] = 0
+    character_sheet_layout: Optional[dict] = None
 
 class UserRead(schemas.BaseUser[PydanticObjectId]):
     package: Optional[str] = "free"
     generation_count: Optional[int] = 0
+    character_sheet_layout: Optional[dict] = None
 
 class UserCreate(schemas.BaseUserCreate):
     pass
@@ -19,6 +21,7 @@ class UserCreate(schemas.BaseUserCreate):
 class UserUpdate(schemas.BaseUserUpdate):
     package: Optional[str]
     generation_count: Optional[int]
+    character_sheet_layout: Optional[dict]
 
 async def get_user_db():
     yield BeanieUserDatabase(User)
