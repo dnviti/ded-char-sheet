@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from beanie import PydanticObjectId
-from pydantic import BaseModel
+from fastapi_users import schemas
 from typing import List, Optional
 
 from ..users import User, UserRead, UserCreate
@@ -14,7 +14,7 @@ QUOTAS = {
     "premium": 100,
 }
 
-class AdminUserUpdate(BaseModel):
+class AdminUserUpdate(schemas.BaseUserUpdate):
     email: Optional[str] = None
     password: Optional[str] = None
     package: Optional[str] = None
