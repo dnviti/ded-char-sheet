@@ -1,5 +1,10 @@
 const { useState, useEffect, useCallback, useRef } = React;
 
+const QUOTAS = {
+    "free": 5,
+    "premium": 20,
+};
+
 const createNewCharacter = () => ({
   id: crypto.randomUUID(),
   name: "New Hero",
@@ -56,25 +61,8 @@ function App() {
     const [characters, setCharacters] = useState([]);
     const [selectedCharacterId, setSelectedCharacterId] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [currentUser, setCurrentUser] = useState(null);
-    const [authChecked, setAuthChecked] = useState(false);
-
-    useEffect(() => {
-        const fetchCurrentUser = async () => {
-            try {
-                const response = await fetch('/users/me');
-                if (response.ok) {
-                    const user = await response.json();
-                    setCurrentUser(user);
-                }
-            } catch (error) {
-                console.error("Error fetching current user", error);
-            } finally {
-                setAuthChecked(true);
-            }
-        };
-        fetchCurrentUser();
-    }, []);
+    const [currentUser, setCurrentUser] = useState(window.USER);
+    const [authChecked, setAuthChecked] = useState(true);
 
     useEffect(() => {
         const path = window.location.pathname;

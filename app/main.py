@@ -11,7 +11,7 @@ from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from .db import connect_to_mongo, close_mongo_connection, get_database
 from .users import User, UserRead, UserCreate, UserUpdate
-from .auth import auth_backend, fastapi_users
+from .auth import auth_backend, fastapi_users, current_user
 from .scheduler import setup_scheduler, shutdown_scheduler
 from .api import characters, gemini, open5e, admin
 
@@ -64,12 +64,13 @@ app.include_router(open5e.router, prefix="/api/open5e", tags=["open5e"])
 app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
 
 @app.get("/", response_class=HTMLResponse)
-async def read_root(request: Request):
+async def read_root(request: Request, user: User = Depends(fastapi_users.current_user(optional=True))):
     return templates.TemplateResponse(
         "index.html",
         {
             "request": request,
             "REGISTRATIONS_ENABLED": REGISTRATIONS_ENABLED,
+            "user": user,
         },
     )
 
@@ -80,17 +81,18 @@ async def redirect_to_root():
 
 
 @app.get("/character/sheet/{character_id}", response_class=HTMLResponse)
-async def read_character_sheet(request: Request, character_id: str):
+async def read_character_sheet(request: Request, character_id: str, user: User = Depends(fastapi_users.current_user(optional=True))):
     return templates.TemplateResponse(
         "character_sheet.html",
         {
             "request": request,
             "character_id": character_id,
             "REGISTRATIONS_ENABLED": REGISTRATIONS_ENABLED,
+            "user": user,
         },
     )
 
 
 @app.get("/admin", response_class=HTMLResponse)
 async def read_admin(request: Request, user: User = Depends(fastapi_users.current_user(active=True, superuser=True))):
-    return templates.TemplateResponse("admin.html", {"request": request})
+    return templates.TemplateResponse("admin.html", {"request": request, "user": user})
