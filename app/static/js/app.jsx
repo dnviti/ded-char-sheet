@@ -1,8 +1,5 @@
 const { useState, useEffect, useCallback, useRef } = React;
 
-// --- Helper Functions & Constants ---
-const getModifier = (score) => Math.floor((score - 10) / 2);
-
 const createNewCharacter = () => ({
   id: crypto.randomUUID(),
   name: "New Hero",
@@ -52,51 +49,8 @@ const SAVING_THROW_NAMES = {
     intelligence: "Intelligence", wisdom: "Wisdom", charisma: "Charisma",
 };
 
-function BurgerMenu({ currentUser, onLogout }) {
-    const [isOpen, setIsOpen] = useState(false);
-    const menuRef = useRef(null);
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (menuRef.current && !menuRef.current.contains(event.target)) {
-                setIsOpen(false);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [menuRef]);
-
-    return (
-        <div className="relative" ref={menuRef}>
-            <button onClick={() => setIsOpen(!isOpen)} className="focus:outline-none">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
-                </svg>
-            </button>
-
-            {isOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-wood-light rounded-lg shadow-xl z-10 border-2 border-theme">
-                    <div className="p-4 border-b border-theme">
-                        <p className="font-bold text-lg text-parchment">{currentUser.email}</p>
-                        <p className="text-sm text-parchment capitalize">{currentUser.package} User</p>
-                    </div>
-                    <div className="py-2">
-                        <p className="px-4 py-2 text-gray-400 text-sm">Coming Soon</p>
-                        <a href="#" className="block px-4 py-2 text-parchment opacity-50 cursor-not-allowed">Dice Roller</a>
-                        <a href="#" className="block px-4 py-2 text-parchment opacity-50 cursor-not-allowed">Condition Tracking</a>
-                    </div>
-                    <div className="border-t border-theme">
-                        <button onClick={() => { onLogout(); setIsOpen(false); }} className="block w-full text-left px-4 py-3 text-parchment hover:bg-theme-light">
-                            Logout
-                        </button>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-}
+// --- Helper Functions & Constants ---
+const getModifier = (score) => Math.floor((score - 10) / 2);
 
 function App() {
     const [characters, setCharacters] = useState([]);
@@ -401,17 +355,15 @@ function App() {
         <>
             {currentUser ? (
                 <div className="min-h-screen">
-                    <header className="bg-wood-light border-b-4 border-theme p-4 flex justify-between items-center shadow-lg print:hidden">
+                    <BurgerMenu currentUser={currentUser} onLogout={handleLogout} />
+                    <header className="bg-wood-light border-b-4 border-theme p-4 flex justify-center items-center shadow-lg print:hidden relative">
                         <div className="flex items-center">
                             <h1 className="text-3xl font-title">Character Keep</h1>
                             <span className="ml-4 text-xs bg-red-800 text-white font-bold px-2 py-1 rounded-full">v0.1.0 Alpha</span>
                         </div>
-                        <div className="flex items-center">
-                            {currentUser.is_superuser && (
-                                <a href="/admin" className="theme-dnd-button mr-4">Admin</a>
-                            )}
-                            <BurgerMenu currentUser={currentUser} onLogout={handleLogout} />
-                        </div>
+                        {currentUser.is_superuser && (
+                            <a href="/admin" className="theme-dnd-button absolute right-4">Admin</a>
+                        )}
                     </header>
                     <main className="p-4 md:p-8">
                         {loading ? (

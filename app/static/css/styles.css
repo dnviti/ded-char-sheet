@@ -1,6 +1,8 @@
 body {
     font-family: 'Lora', serif;
+    background-color: #f3e9d2; /* A light parchment color as a base */
 }
+
 @media print {
     body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     #character-sheet-printable > div { display: block !important; }
@@ -9,6 +11,59 @@ body {
     .print\:hidden { display: none !important; }
 }
 
-.burger-menu-dropdown a:hover {
-    background-color: #c8a_9_5; /* A slightly darker shade for hover */
+/* New Theme Colors */
+.bg-wood-dark {
+    background-color: #3a2a1a; /* A deep, rich brown for the menu */
+}
+
+.bg-wood-light {
+    background-color: #6f4e37; /* A lighter, coffee-like brown for header/footer */
+}
+
+.text-parchment {
+    color: #f3e9d2;
+}
+.text-parchment-light {
+    color: #dcd3b_4_;
+}
+
+.border-theme {
+    border-color: #8B4513; /* SaddleBrown, a classic fantasy leather color */
+}
+.border-theme-light {
+    border-color: #a0522d; /* Sienna, a slightly lighter leather color */
+}
+
+.hover\:bg-theme:hover {
+    background-color: #8B4513;
+}
+.hover\:bg-theme-light:hover {
+     background-color: #a0522d;
+}
+
+.focus\:bg-theme-dark:focus {
+    background-color: #5c2d0c; /* A darker brown for focus states */
+}
+
+.theme-dnd-button {
+    background-color: #8B4513;
+    color: #f3e9d2;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-family: 'MedievalSharp', cursive;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 3px solid #5c2d0c;
+    transition: all 0.2s ease-in-out;
+}
+.theme-dnd-button:hover {
+    background-color: #a0522d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Ensure the main content area is pushed over when the menu might be visible, to avoid overlap on some screen sizes if needed */
+/* This is more of a placeholder, as the current implementation uses a fixed menu that overlays content */
+.main-content {
+    transition: margin-left .3s;
 }
