@@ -243,9 +243,34 @@ function App() {
             required: ["name", "className", "level", "race", "background", "alignment", "abilityScores", "appearance", "personalityTraits", "ideals", "bonds", "flaws"],
         };
 
-        const prompt = `You are a D&D expert. Generate a complete character sheet based on this concept: "${concept}". Follow the provided JSON schema precisely.`;
-
         try {
+            // Fetch Open5e data
+            const [classes, species, backgrounds] = await Promise.all([
+                fetch('/api/open5e/classes?limit=20').then(res => res.json()),
+                fetch('/api/open5e/species?limit=40').then(res => res.json()),
+                fetch('/api/open5e/backgrounds?limit=50').then(res => res.json())
+            ]);
+
+            const classNames = classes.map(c => c.name);
+            const speciesNames = species.map(s => s.name);
+            const backgroundNames = backgrounds.map(b => b.name);
+
+            const prompt = `
+                You are a D&D expert creating a new character.
+                The user's concept is: "${concept}".
+
+                Generate a complete D&D 5e character sheet following the provided JSON schema.
+
+                You MUST use one of the following options for the character's class, race, and background.
+                - **Available Classes**: ${classNames.join(", ")}
+                - **Available Races (Species)**: ${speciesNames.join(", ")}
+                - **Available Backgrounds**: ${backgroundNames.join(", ")}
+
+                Based on the chosen class, ensure the ability scores, features, and proficiencies are accurate for a level ${schema.properties.level.description} character.
+                For ability scores, use a standard array or point buy method, but feel free to adjust them to fit the character concept.
+                The final output must be only the JSON object, adhering strictly to the schema.
+            `;
+
             const generatedJson = await callGeminiAPI(prompt, schema);
             if (!generatedJson) return;
 
