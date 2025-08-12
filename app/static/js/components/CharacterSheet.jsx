@@ -66,7 +66,8 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
             {/* --- Header --- */}
             <SheetHeader
                 name={sheetData.name}
-                classLevel={sheetData.classLevel}
+                className={sheetData.className}
+                level={sheetData.level}
                 race={sheetData.race}
                 background={sheetData.background}
                 alignment={sheetData.alignment}
@@ -104,7 +105,7 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
                     <CharacterPortrait
                         imageUrl={sheetData.imageUrl}
                         isGenerating={isGenerating.portrait}
-                        onGenerate={() => handleGenerate('portrait', `Fantasy character portrait, D&D style. ${sheetData.appearance || `A ${sheetData.race} ${sheetData.classLevel}`}. High quality digital painting, detailed face, fantasy art, cinematic lighting.`, null, generationDeps)}
+                        onGenerate={() => handleGenerate('portrait', `Fantasy character portrait, D&D style. ${sheetData.appearance || `A ${sheetData.race} ${sheetData.className} ${sheetData.level}`}. High quality digital painting, detailed face, fantasy art, cinematic lighting.`, null, generationDeps)}
                     />
                     <Equipment
                         equipment={sheetData.equipment}
@@ -120,7 +121,7 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
                     <CharacterBackground
                         data={sheetData}
                         isGenerating={isGenerating.background}
-                        onGenerate={() => handleGenerate('background', `Generate a personality trait, an ideal, a bond, and a flaw for a ${sheetData.race} ${sheetData.classLevel} with a "${sheetData.background}" background.`, { type: "OBJECT", properties: { personalityTraits: { type: "STRING" }, ideals: { type: "STRING" }, bonds: { type: "STRING" }, flaws: { type: "STRING" } }, required: ["personalityTraits", "ideals", "bonds", "flaws"] }, generationDeps)}
+                        onGenerate={() => handleGenerate('background', `Generate a personality trait, an ideal, a bond, and a flaw for a ${sheetData.race} ${sheetData.className} ${sheetData.level} with a "${sheetData.background}" background.`, { type: "OBJECT", properties: { personalityTraits: { type: "STRING" }, ideals: { type: "STRING" }, bonds: { type: "STRING" }, flaws: { type: "STRING" } }, required: ["personalityTraits", "ideals", "bonds", "flaws"] }, generationDeps)}
                         onUpdate={handleChange}
                     />
                     <FeaturesTraits features={sheetData.features} onUpdate={(val) => handleChange('features', val)} />
