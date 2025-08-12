@@ -4,7 +4,11 @@ body {
 @media print {
     body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     #character-sheet-printable > div { display: block !important; }
-    .print-container { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 1rem !important; }
+    .print-container { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
     .print-col-span-2 { grid-column: span 2 / span 2; }
     .print\:hidden { display: none !important; }
+}
+
+.burger-menu-dropdown a:hover {
+    background-color: #c8a_9_5; /* A slightly darker shade for hover */
 }
