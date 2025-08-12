@@ -1,10 +1,4 @@
 const { useState, useEffect, useCallback, useRef } = React;
-const {
-    useState: useState,
-    useEffect: useEffect,
-    useCallback: useCallback,
-    useRef: useRef,
-} = React;
 
 const createNewCharacter = () => ({
   id: crypto.randomUUID(),
