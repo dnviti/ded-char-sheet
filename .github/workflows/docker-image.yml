@@ -3,6 +3,9 @@ name: Release and Docker Image CI
 on:
   workflow_dispatch:
   push:
+    branches:
+      - master
+      - develop
     tags:
       - 'v*.*.*' # Trigger on semantic versioning tags like v1.0.0
 
