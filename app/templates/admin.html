@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scheda Personaggio D&D 5e con IA</title>
+    <title>Admin Dashboard</title>
 
     <!-- Tailwind CSS from CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -20,10 +20,6 @@
     <!-- Babel for JSX transpilation -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- PDF Generation Libraries from CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
     <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='/css/theme.css') }}">
 </head>
@@ -33,13 +29,7 @@
         <p>D&D Character Sheet based on open5e API</p>
     </footer>
 
-    <script type="text/babel" src="{{ url_for('static', path='/js/components/UI.jsx') }}"></script>
-    <script type="text/babel" src="{{ url_for('static', path='/js/components/CharacterSheet.utils.js') }}"></script>
-    <script type="text/babel" src="{{ url_for('static', path='/js/components/CharacterSheetSections.jsx') }}"></script>
-    <script type="text/babel" src="{{ url_for('static', path='/js/components/AuthForm.jsx') }}"></script>
-    <script type="text/babel" src="{{ url_for('static', path='/js/components/SearchableSelect.jsx') }}"></script>
-    <script type="text/babel" src="{{ url_for('static', path='/js/components/CharacterSheet.jsx') }}"></script>
-    <script type="text/babel" src="{{ url_for('static', path='/js/components/CharacterSelector.jsx') }}"></script>
-    <script type="text/babel" src="{{ url_for('static', path='/js/app.jsx') }}"></script>
+    <script type="text/babel" src="{{ url_for('static', path='/js/components/AdminDashboard.jsx') }}"></script>
+    <script type="text/babel" src="{{ url_for('static', path='/js/admin.jsx') }}"></script>
 </body>
 </html>
