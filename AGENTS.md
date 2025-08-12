@@ -67,3 +67,5 @@ The application uses MongoDB. Make sure you have a running MongoDB instance that
 When testing the application, do not use Docker or Docker Compose. If you need to interact with the database during testing, you must ask for the test MongoDB connection string. Do not attempt to run a MongoDB instance yourself.
 
 You should only test the application if the user explicitly asks you to.
+
+When working on features that use the Open5e data, you can refer to the tests in `tests/test_open5e.py` to understand the data structure of the different collections.
