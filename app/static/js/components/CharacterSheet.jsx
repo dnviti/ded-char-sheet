@@ -100,17 +100,17 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
     };
 
     const initialLayout = [
-        { i: 'ability-scores', x: 0, y: 0, w: 1, h: 2 },
-        { i: 'inspiration-prof-perc', x: 0, y: 2, w: 1, h: 1 },
-        { i: 'saving-throws', x: 0, y: 3, w: 1, h: 2 },
-        { i: 'combat-stats', x: 1, y: 0, w: 1, h: 2 },
-        { i: 'attacks', x: 1, y: 2, w: 1, h: 1 },
-        { i: 'character-portrait', x: 1, y: 3, w: 1, h: 2 },
-        { i: 'equipment', x: 1, y: 5, w: 1, h: 2 },
-        { i: 'skills', x: 2, y: 0, w: 1, h: 3 },
-        { i: 'character-background', x: 2, y: 3, w: 1, h: 2 },
-        { i: 'features-traits', x: 2, y: 5, w: 1, h: 2 },
-        { i: 'spells', x: 0, y: 7, w: 3, h: 3 },
+        { i: 'ability-scores', x: 0, y: 0, w: 1, h: 10 },
+        { i: 'inspiration-prof-perc', x: 0, y: 10, w: 1, h: 5 },
+        { i: 'saving-throws', x: 0, y: 15, w: 1, h: 10 },
+        { i: 'combat-stats', x: 1, y: 0, w: 1, h: 10 },
+        { i: 'attacks', x: 1, y: 10, w: 1, h: 5 },
+        { i: 'character-portrait', x: 1, y: 15, w: 1, h: 10 },
+        { i: 'equipment', x: 1, y: 25, w: 1, h: 10 },
+        { i: 'skills', x: 2, y: 0, w: 1, h: 15 },
+        { i: 'character-background', x: 2, y: 15, w: 1, h: 10 },
+        { i: 'features-traits', x: 2, y: 25, w: 1, h: 10 },
+        { i: 'spells', x: 0, y: 35, w: 3, h: 15 },
     ];
 
     // --- RENDER ---
@@ -141,88 +141,110 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
                 layouts={Object.keys(layouts).length > 0 ? layouts : { lg: initialLayout }}
                 breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
                 cols={{ lg: 3, md: 2, sm: 1, xs: 1, xxs: 1 }}
-                rowHeight={100}
+                rowHeight={20}
                 onLayoutChange={handleLayoutChange}
                 draggableHandle=".tile-header"
             >
                 <div key="ability-scores">
                     <div className="tile-header"><span>Ability Scores</span></div>
-                    <AbilityScores scores={sheetData.abilityScores} onUpdate={handleChange} />
+                    <div className="tile-content">
+                        <AbilityScores scores={sheetData.abilityScores} onUpdate={handleChange} />
+                    </div>
                 </div>
                 <div key="inspiration-prof-perc">
                     <div className="tile-header"><span>Stats</span></div>
-                    <div className="grid grid-cols-3 gap-2 text-center">
-                        <ThemedStatBox label="Inspiration" value={sheetData.inspiration} onUpdate={(val) => handleChange('inspiration', val)} editable />
-                        <ThemedStatBox label="Prof. Bonus" value={`+${sheetData.proficiencyBonus}`} />
-                        <ThemedStatBox label="Passive Percep." value={passivePerception} />
+                    <div className="tile-content">
+                        <div className="grid grid-cols-3 gap-2 text-center">
+                            <ThemedStatBox label="Inspiration" value={sheetData.inspiration} onUpdate={(val) => handleChange('inspiration', val)} editable />
+                            <ThemedStatBox label="Prof. Bonus" value={`+${sheetData.proficiencyBonus}`} />
+                            <ThemedStatBox label="Passive Percep." value={passivePerception} />
+                        </div>
                     </div>
                 </div>
                 <div key="saving-throws">
                     <div className="tile-header"><span>Saving Throws</span></div>
-                    <SavingThrows savingThrows={sheetData.savingThrows} abilityScores={sheetData.abilityScores} proficiencyBonus={sheetData.proficiencyBonus} onUpdate={handleChange} />
+                    <div className="tile-content">
+                        <SavingThrows savingThrows={sheetData.savingThrows} abilityScores={sheetData.abilityScores} proficiencyBonus={sheetData.proficiencyBonus} onUpdate={handleChange} />
+                    </div>
                 </div>
                 <div key="combat-stats">
                     <div className="tile-header"><span>Combat</span></div>
-                    <CombatStats
-                        ac={sheetData.armorClass}
-                        initiative={getModifier(sheetData.abilityScores.dexterity)}
-                        speed={sheetData.speed}
-                        hp={sheetData}
-                        onUpdate={handleChange}
-                    />
+                    <div className="tile-content">
+                        <CombatStats
+                            ac={sheetData.armorClass}
+                            initiative={getModifier(sheetData.abilityScores.dexterity)}
+                            speed={sheetData.speed}
+                            hp={sheetData}
+                            onUpdate={handleChange}
+                        />
+                    </div>
                 </div>
                 <div key="attacks">
                     <div className="tile-header"><span>Attacks</span></div>
-                    <Attacks equipment={sheetData.equipment} onUpdate={(val) => handleChange('equipment', val)} />
+                    <div className="tile-content">
+                        <Attacks equipment={sheetData.equipment} onUpdate={(val) => handleChange('equipment', val)} />
+                    </div>
                 </div>
                 <div key="character-portrait">
                     <div className="tile-header">
                         <span>Portrait</span>
                          <MagicButton onClick={() => handleGenerate('portrait', `Fantasy character portrait, D&D style. ${sheetData.appearance || `A ${sheetData.race} ${sheetData.className} ${sheetData.level}`}. High quality digital painting, detailed face, fantasy art, cinematic lighting.`, null, generationDeps)} isLoading={isGenerating.portrait} className="py-1 px-2 text-xs">Generate</MagicButton>
                     </div>
-                    <CharacterPortrait imageUrl={sheetData.imageUrl}/>
+                    <div className="tile-content">
+                        <CharacterPortrait imageUrl={sheetData.imageUrl}/>
+                    </div>
                 </div>
                 <div key="equipment">
                     <div className="tile-header">
                         <span>Equipment</span>
                         <SearchableSelect resourceType="equipment" onSelect={handleAddItemToEquipment} placeholder="Add Item..." />
                     </div>
-                    <Equipment
-                        equipment={sheetData.equipment}
-                        currency={sheetData.currency}
-                        onUpdate={handleChange}
-                    />
+                    <div className="tile-content">
+                        <Equipment
+                            equipment={sheetData.equipment}
+                            currency={sheetData.currency}
+                            onUpdate={handleChange}
+                        />
+                    </div>
                 </div>
                 <div key="skills">
                     <div className="tile-header"><span>Skills</span></div>
-                    <Skills skills={sheetData.skills} abilityScores={sheetData.abilityScores} proficiencyBonus={sheetData.proficiencyBonus} onUpdate={handleChange} />
+                    <div className="tile-content">
+                        <Skills skills={sheetData.skills} abilityScores={sheetData.abilityScores} proficiencyBonus={sheetData.proficiencyBonus} onUpdate={handleChange} />
+                    </div>
                 </div>
                 <div key="character-background">
                      <div className="tile-header">
                         <span>Background</span>
                         <MagicButton onClick={() => handleGenerate('background', `Generate a personality trait, an ideal, a bond, and a flaw for a ${sheetData.race} ${sheetData.className} ${sheetData.level} with a "${sheetData.background}" background.`, { type: "OBJECT", properties: { personalityTraits: { type: "STRING" }, ideals: { type: "STRING" }, bonds: { type: "STRING" }, flaws: { type: "STRING" } }, required: ["personalityTraits", "ideals", "bonds", "flaws"] }, generationDeps)} isLoading={isGenerating.background} className="py-1 px-2 text-xs">Generate</MagicButton>
                     </div>
-                    <CharacterBackground
-                        data={sheetData}
-                        onUpdate={handleChange}
-                    />
+                    <div className="tile-content">
+                        <CharacterBackground
+                            data={sheetData}
+                            onUpdate={handleChange}
+                        />
+                    </div>
                 </div>
                 <div key="features-traits">
                     <div className="tile-header"><span>Features & Traits</span></div>
-                    <FeaturesTraits features={sheetData.features} onUpdate={(val) => handleChange('features', val)} />
+                    <div className="tile-content">
+                        <FeaturesTraits features={sheetData.features} onUpdate={(val) => handleChange('features', val)} />
+                    </div>
                 </div>
                 <div key="spells">
                     <div className="tile-header">
                         <span>Spells</span>
                         <SearchableSelect resourceType="spells" onSelect={handleAddSpellFromSearch} placeholder="Add Spell..." />
                     </div>
-                    <Spells
-                        spellcasting={sheetData.spellcasting}
-                        abilityScores={sheetData.abilityScores}
-                        proficiencyBonus={sheetData.proficiencyBonus}
-                        onUpdate={handleChange}
-                        onUpdateLevel={handleSpellcastingChange}
-                    />
+                    <div className="tile-content">
+                        <Spells
+                            spellcasting={sheetData.spellcasting}
+                            abilityScores={sheetData.abilityScores}
+                            proficiencyBonus={sheetData.proficiencyBonus}
+                            onUpdate={handleChange}
+                            onUpdateLevel={handleSpellcastingChange}
+                        />
+                    </div>
                 </div>
             </Responsive>
         </div>
