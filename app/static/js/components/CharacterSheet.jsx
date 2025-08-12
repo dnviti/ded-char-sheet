@@ -16,6 +16,18 @@ const debounce = (func, delay) => {
 const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagenAPI, onUpdateLayout }) => {
     const [sheetData, setSheetData] = useState(character);
     const [isGenerating, setIsGenerating] = useState({ appearance: false, background: false, portrait: false, hook: false });
+    const fileInputRef = React.useRef(null);
+
+    const handleUploadClick = () => {
+        fileInputRef.current.click();
+    };
+
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            handleImageUpload(file);
+        }
+    };
     
     // A stable, generous default layout. This prevents collapsed tiles.
     const initialLayoutConfig = {
@@ -163,28 +175,61 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
                     <div className="tile-content"><Attacks equipment={sheetData.equipment} onUpdate={(val) => handleChange('equipment', val)} /></div>
                 </div>
                 <div key="character-portrait">
-                    <div className="tile-header"><span>Portrait</span><MagicButton onClick={() => handleGenerate('portrait', `Fantasy character portrait, D&D style. ${sheetData.appearance || `A ${sheetData.race} ${sheetData.className} ${sheetData.level}`}. High quality digital painting, detailed face, fantasy art, cinematic lighting.`, null, generationDeps)} isLoading={isGenerating.portrait} className="py-1 px-2 text-xs">Generate</MagicButton></div>
-                    <div className="tile-content"><CharacterPortrait imageUrl={sheetData.imageUrl} onImageUpload={handleImageUpload}/></div>
+                    <div className="tile-header"><span>Portrait</span></div>
+                    <div className="tile-content">
+                        <div className="flex justify-start mb-2 space-x-2">
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileChange}
+                                className="hidden"
+                                accept="image/*"
+                            />
+                            <button
+                                onClick={handleUploadClick}
+                                className="theme-dnd-button text-xs py-1 px-2"
+                            >
+                                Upload
+                            </button>
+                            <MagicButton onClick={() => handleGenerate('portrait', `Fantasy character portrait, D&D style. ${sheetData.appearance || `A ${sheetData.race} ${sheetData.className} ${sheetData.level}`}. High quality digital painting, detailed face, fantasy art, cinematic lighting.`, null, generationDeps)} isLoading={isGenerating.portrait} className="py-1 px-2 text-xs">Generate</MagicButton>
+                        </div>
+                        <CharacterPortrait imageUrl={sheetData.imageUrl} />
+                    </div>
                 </div>
                 <div key="equipment">
-                    <div className="tile-header"><span>Equipment</span><SearchableSelect resourceType="equipment" onSelect={handleAddItemToEquipment} placeholder="Add Item..." /></div>
-                    <div className="tile-content"><Equipment equipment={sheetData.equipment} currency={sheetData.currency} onUpdate={handleChange} /></div>
+                    <div className="tile-header"><span>Equipment</span></div>
+                    <div className="tile-content">
+                        <div className="mb-2">
+                            <SearchableSelect resourceType="equipment" onSelect={handleAddItemToEquipment} placeholder="Add Item..." />
+                        </div>
+                        <Equipment equipment={sheetData.equipment} currency={sheetData.currency} onUpdate={handleChange} />
+                    </div>
                 </div>
                 <div key="skills">
                     <div className="tile-header"><span>Skills</span></div>
                     <div className="tile-content"><Skills skills={sheetData.skills} abilityScores={sheetData.abilityScores} proficiencyBonus={sheetData.proficiencyBonus} onUpdate={handleChange} /></div>
                 </div>
                 <div key="character-background">
-                     <div className="tile-header"><span>Background</span><MagicButton onClick={() => handleGenerate('background', `Generate a personality trait, an ideal, a bond, and a flaw for a ${sheetData.race} ${sheetData.className} ${sheetData.level} with a "${sheetData.background}" background.`, { type: "OBJECT", properties: { personalityTraits: { type: "STRING" }, ideals: { type: "STRING" }, bonds: { type: "STRING" }, flaws: { type: "STRING" } }, required: ["personalityTraits", "ideals", "bonds", "flaws"] }, generationDeps)} isLoading={isGenerating.background} className="py-1 px-2 text-xs">Generate</MagicButton></div>
-                    <div className="tile-content"><CharacterBackground data={sheetData} onUpdate={handleChange} /></div>
+                    <div className="tile-header"><span>Background</span></div>
+                    <div className="tile-content">
+                        <div className="flex justify-end mb-2">
+                            <MagicButton onClick={() => handleGenerate('background', `Generate a personality trait, an ideal, a bond, and a flaw for a ${sheetData.race} ${sheetData.className} ${sheetData.level} with a "${sheetData.background}" background.`, { type: "OBJECT", properties: { personalityTraits: { type: "STRING" }, ideals: { type: "STRING" }, bonds: { type: "STRING" }, flaws: { type: "STRING" } }, required: ["personalityTraits", "ideals", "bonds", "flaws"] }, generationDeps)} isLoading={isGenerating.background} className="py-1 px-2 text-xs">Generate</MagicButton>
+                        </div>
+                        <CharacterBackground data={sheetData} onUpdate={handleChange} />
+                    </div>
                 </div>
                 <div key="features-traits">
                     <div className="tile-header"><span>Features & Traits</span></div>
                     <div className="tile-content"><FeaturesTraits features={sheetData.features} onUpdate={(val) => handleChange('features', val)} /></div>
                 </div>
                 <div key="spells">
-                    <div className="tile-header"><span>Spells</span><SearchableSelect resourceType="spells" onSelect={handleAddSpellFromSearch} placeholder="Add Spell..." /></div>
-                    <div className="tile-content"><Spells spellcasting={sheetData.spellcasting} abilityScores={sheetData.abilityScores} proficiencyBonus={sheetData.proficiencyBonus} onUpdate={handleChange} onUpdateLevel={handleSpellcastingChange} /></div>
+                    <div className="tile-header"><span>Spells</span></div>
+                    <div className="tile-content">
+                        <div className="mb-2">
+                            <SearchableSelect resourceType="spells" onSelect={handleAddSpellFromSearch} placeholder="Add Spell..." />
+                        </div>
+                        <Spells spellcasting={sheetData.spellcasting} abilityScores={sheetData.abilityScores} proficiencyBonus={sheetData.proficiencyBonus} onUpdate={handleChange} onUpdateLevel={handleSpellcastingChange} />
+                    </div>
                 </div>
             </Responsive>
         </div>

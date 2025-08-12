@@ -161,22 +161,9 @@ const Attacks = ({ equipment, onUpdate }) => (
     />
 );
 
-const CharacterPortrait = ({ imageUrl, onImageUpload }) => {
-    const fileInputRef = React.useRef(null);
-
-    const handleUploadClick = () => {
-        fileInputRef.current.click();
-    };
-
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            onImageUpload(file);
-        }
-    };
-
+const CharacterPortrait = ({ imageUrl }) => {
     return (
-        <div className="relative flex items-center justify-center h-full bg-wood-dark rounded-md overflow-hidden">
+        <div className="relative flex items-center justify-center h-[94%] bg-wood-dark rounded-md overflow-hidden">
             {imageUrl ? (
                 <img src={imageUrl} alt="Character Portrait" className="w-full h-full object-cover" />
             ) : (
@@ -185,19 +172,6 @@ const CharacterPortrait = ({ imageUrl, onImageUpload }) => {
                     <p className="text-xs">Use the ✨ button to generate one or upload your own!</p>
                 </div>
             )}
-            <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                className="hidden"
-                accept="image/*"
-            />
-            <button
-                onClick={handleUploadClick}
-                className="absolute bottom-2 right-2 theme-dnd-button text-xs py-1 px-2"
-            >
-                Upload
-            </button>
         </div>
     );
 };
