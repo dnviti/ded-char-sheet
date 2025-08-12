@@ -3,18 +3,8 @@ const { useState, useEffect, useCallback, useRef } = React;
 // Main component remains the same for logic
 const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagenAPI }) => {
     const [sheetData, setSheetData] = useState(character);
-    const debouncedSheetData = useDebounce(sheetData, 1000);
-    const isInitialMount = useRef(true);
     const [activeTab, setActiveTab] = useState('main');
     const [isGenerating, setIsGenerating] = useState({ appearance: false, background: false, portrait: false, hook: false });
-
-    useEffect(() => {
-        if (isInitialMount.current) {
-            isInitialMount.current = false;
-            return;
-        }
-        onUpdate(debouncedSheetData);
-    }, [debouncedSheetData]);
 
     useEffect(() => {
         setSheetData(character);
@@ -60,6 +50,10 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
 
     const generationDeps = { setIsGenerating, callImagenAPI, callGeminiAPI, setSheetData, handleChange };
 
+    const handleSave = () => {
+        onUpdate(sheetData);
+    };
+
     // --- RENDER ---
     return (
         <div id="character-sheet-printable">
@@ -75,6 +69,7 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
                 onBack={onBack}
                 onUpdate={handleChange}
                 onSelectAPI={(resourceType, item) => handleSelectFromAPI(resourceType, item, setSheetData)}
+                onSave={handleSave}
             />
 
             {/* --- Main Content --- */}
