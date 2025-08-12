@@ -137,6 +137,20 @@ function App() {
         setSelectedCharacterId(null);
     };
 
+    const refreshCurrentUser = async () => {
+        try {
+            const userResponse = await fetch('/users/me');
+            if (userResponse.ok) {
+                const user = await userResponse.json();
+                setCurrentUser(user);
+            } else {
+                console.error("Failed to refresh user data:", userResponse.statusText);
+            }
+        } catch (error) {
+            console.error("Error refreshing user data:", error);
+        }
+    };
+
     const callGeminiAPI = async (prompt, jsonSchema = null) => {
         const payload = { prompt, json_schema: jsonSchema, is_image: false };
         try {
@@ -152,6 +166,7 @@ function App() {
             const result = await response.json();
             const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
             if (!text) { throw new Error("Invalid or empty API response."); }
+            await refreshCurrentUser(); // Refresh user data after successful generation
             return text;
         } catch (error) {
             console.error("Error calling Gemini proxy:", error);
@@ -298,6 +313,7 @@ function App() {
             const savedChar = await response.json();
             setCharacters(prev => [...prev, savedChar]);
             setSelectedCharacterId(savedChar.id);
+            await refreshCurrentUser(); // Refresh user data after character is saved
 
         } catch (error) {
             console.error("Full character generation failed:", error);
