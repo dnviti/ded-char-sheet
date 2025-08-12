@@ -77,6 +77,14 @@ function App() {
     }, []);
 
     useEffect(() => {
+        const path = window.location.pathname;
+        const match = path.match(/\/character\/sheet\/(.+)/);
+        if (match) {
+            setSelectedCharacterId(match[1]);
+        }
+    }, []);
+
+    useEffect(() => {
         if (!currentUser) {
             setCharacters([]);
             return;
@@ -346,8 +354,12 @@ function App() {
         }
     };
 
-    const handleBackToSelector = () => { setSelectedCharacterId(null); };
+    const handleBackToSelector = () => {
+        setSelectedCharacterId(null);
+        window.history.pushState({}, '', '/');
+    };
     const selectedCharacter = characters.find(c => c.id === selectedCharacterId);
+    const isCharacterSheetPage = window.location.pathname.startsWith('/character/sheet/');
 
     if (!authChecked) {
         return (
@@ -372,14 +384,18 @@ function App() {
                         )}
                     </header>
                     <main className="p-4 md:p-8">
-                        {loading ? (
+                        {loading && !selectedCharacter ? (
                              <div className="flex flex-col items-center justify-center p-4">
                                 <h1 className="text-4xl font-title">Loading Heroes...</h1>
                             </div>
-                        ) : !selectedCharacter ? (
+                        ) : !selectedCharacterId || !isCharacterSheetPage ? (
                             <CharacterSelector characters={characters} onSelect={handleSelectCharacter} onCreate={handleCreateCharacter} onDelete={handleDeleteCharacter} onFullGenerate={handleFullGenerateCharacter} />
-                        ) : (
+                        ) : selectedCharacter ? (
                             <CharacterSheet user={currentUser} character={selectedCharacter} onUpdate={handleUpdateCharacter} onBack={handleBackToSelector} callGeminiAPI={callGeminiAPI} callImagenAPI={callImagenAPI} onUpdateLayout={handleUpdateCharacterLayout} />
+                        ) : (
+                            <div className="flex flex-col items-center justify-center p-4">
+                                <h1 className="text-4xl font-title">Loading Character...</h1>
+                            </div>
                         )}
                     </main>
                 </div>

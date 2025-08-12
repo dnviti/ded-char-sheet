@@ -25,23 +25,29 @@ const FullGeneratorModal = ({ isOpen, onClose, onGenerate, isLoading }) => {
     );
 };
 
-const CharacterCard = ({ char, onSelect, onDelete }) => (
-    <div className="theme-dnd-card flex flex-col text-center p-4 transition-all duration-300 hover:scale-105 hover:border-accent-gold">
-        <div className="relative">
-            <img
-                src={char.imageUrl || 'https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png'}
-                alt={`Portrait of ${char.name}`}
-                className="w-full h-60 object-cover rounded border-2 border-theme mb-4"
-            />
-             <button onClick={() => onDelete(char.id)} className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-accent-red" aria-label="Delete character">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
+const CharacterCard = ({ char, onSelect, onDelete }) => {
+    const handleSelect = () => {
+        window.location.href = `/character/sheet/${char.id}`;
+    };
+
+    return (
+        <div className="theme-dnd-card flex flex-col text-center p-4 transition-all duration-300 hover:scale-105 hover:border-accent-gold">
+            <div className="relative">
+                <img
+                    src={char.imageUrl || 'https://storage.googleapis.com/proudcity/mebanenc/uploads/2021/03/placeholder-image.png'}
+                    alt={`Portrait of ${char.name}`}
+                    className="w-full h-60 object-cover rounded border-2 border-theme mb-4"
+                />
+                 <button onClick={() => onDelete(char.id)} className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-accent-red" aria-label="Delete character">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <h3 className="font-title text-2xl">{char.name}</h3>
+            <p className="text-parchment mb-4">{char.classLevel} | {char.race}</p>
+            <button onClick={handleSelect} className="theme-dnd-button mt-auto">Load Sheet</button>
         </div>
-        <h3 className="font-title text-2xl">{char.name}</h3>
-        <p className="text-parchment mb-4">{char.classLevel} | {char.race}</p>
-        <button onClick={() => onSelect(char.id)} className="theme-dnd-button mt-auto">Load Sheet</button>
-    </div>
-);
+    );
+};
 
 const CharacterSelector = ({ characters, onSelect, onCreate, onDelete, onFullGenerate }) => {
     const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
