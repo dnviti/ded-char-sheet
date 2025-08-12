@@ -52,6 +52,9 @@ function BurgerMenu({ currentUser, onLogout }) {
                     <div className="p-4 border-b-2 border-theme-light">
                         <p className="font-bold text-xl text-parchment">{currentUser.email}</p>
                         <p className="text-sm text-parchment-light capitalize">{currentUser.package} User</p>
+                        <p className="text-sm text-parchment-light">
+                            Generations: {currentUser.generation_count} / {QUOTAS[currentUser.package]}
+                        </p>
                     </div>
 
                     {/* Navigation */}

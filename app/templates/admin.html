@@ -30,6 +30,10 @@
         <p>D&D Character Sheet based on open5e API</p>
     </footer>
 
+    <script>
+        window.USER = {{ user.model_dump_json()|safe if user else 'null' }};
+    </script>
+
     <script type="text/babel" src="{{ url_for('static', path='/js/components/AdminDashboard.jsx') }}"></script>
     <script type="text/babel" src="{{ url_for('static', path='/js/admin.jsx') }}"></script>
 </body>

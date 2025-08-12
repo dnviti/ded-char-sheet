@@ -14,8 +14,8 @@ router = APIRouter()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 QUOTAS = {
-    "free": 10,
-    "premium": 100,
+    "free": 5,
+    "premium": 20,
 }
 
 class GeminiRequest(BaseModel):
