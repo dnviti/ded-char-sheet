@@ -24,10 +24,8 @@ def test_get_open5e_resource(client: TestClient, resource_type: str):
     """
     response = client.get(f"/api/open5e/{resource_type}")
     assert response.status_code == 200
-    
     data = response.json()
     assert isinstance(data, list)
-    
     # Check if the list is not empty
     # Note: This assumes the test database has data for these collections.
     # If a collection is empty, this test will need adjustment.
