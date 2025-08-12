@@ -9,4 +9,4 @@ fastapi-users[beanie]==14.0.1
 email_validator==2.2.0
 httpx==0.28.1
 pytest==8.4.1
-pytest-asyncio==0.24.0
+pytest-asyncio==1.1.0

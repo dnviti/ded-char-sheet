@@ -8,7 +8,7 @@ from app.auth import current_user
 from app.users import User
 
 # Test database connection
-MONGODB_URL = os.getenv("MONGODB_URL", "mongodb+srv://dnviti:2N5Ec2xUc2NrzqQ4@development.atn4rbh.mongodb.net/")
+MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
 DB_NAME = "dedchar"
 
 # Create a test client for the database
