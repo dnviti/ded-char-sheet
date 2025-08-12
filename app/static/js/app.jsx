@@ -372,6 +372,12 @@ function App() {
         }
     }, []);
 
+    const handleUpdateCharacterLayout = (characterId, layout) => {
+        setCharacters(prev => prev.map(char =>
+            char.id === characterId ? { ...char, layout: layout } : char
+        ));
+    };
+
     const handleDeleteCharacter = async (id) => {
         if (window.confirm("Are you sure you want to delete this character? This action is irreversible.")) {
             try {
@@ -421,7 +427,7 @@ function App() {
                         ) : !selectedCharacter ? (
                             <CharacterSelector characters={characters} onSelect={handleSelectCharacter} onCreate={handleCreateCharacter} onDelete={handleDeleteCharacter} onFullGenerate={handleFullGenerateCharacter} />
                         ) : (
-                            <CharacterSheet user={currentUser} character={selectedCharacter} onUpdate={handleUpdateCharacter} onBack={handleBackToSelector} callGeminiAPI={callGeminiAPI} callImagenAPI={callImagenAPI} />
+                            <CharacterSheet user={currentUser} character={selectedCharacter} onUpdate={handleUpdateCharacter} onBack={handleBackToSelector} callGeminiAPI={callGeminiAPI} callImagenAPI={callImagenAPI} onUpdateLayout={handleUpdateCharacterLayout} />
                         )}
                     </main>
                 </div>

@@ -13,18 +13,19 @@ const debounce = (func, delay) => {
 };
 
 // Main component remains the same for logic
-const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagenAPI, user }) => {
+const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagenAPI, onUpdateLayout }) => {
     const [sheetData, setSheetData] = useState(character);
     const [isGenerating, setIsGenerating] = useState({ appearance: false, background: false, portrait: false, hook: false });
-    const [layouts, setLayouts] = useState(user.character_sheet_layout || {});
+    const [layouts, setLayouts] = useState(character.layout || {});
 
     useEffect(() => {
         setSheetData(character);
+        setLayouts(character.layout || {});
     }, [character]);
 
     const saveLayout = async (layoutsToSave) => {
         try {
-            const response = await fetch('/api/users/me/layout', {
+            const response = await fetch(`/api/characters/${character.id}/layout`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -37,15 +38,20 @@ const CharacterSheet = ({ character, onUpdate, onBack, callGeminiAPI, callImagen
                 console.error('Failed to save layout:', errorText);
                 throw new Error('Failed to save layout');
             }
+            // Update parent state
+            if (onUpdateLayout) {
+                onUpdateLayout(character.id, layoutsToSave);
+            }
         } catch (error) {
             console.error('Error saving layout:', error);
         }
     };
 
-    const debouncedSaveLayout = useCallback(debounce(saveLayout, 1000), []);
+    const debouncedSaveLayout = useCallback(debounce(saveLayout, 1000), [character.id, onUpdateLayout]);
 
     const handleLayoutChange = (layout, allLayouts) => {
         setLayouts(allLayouts);
+        setSheetData(prev => ({ ...prev, layout: allLayouts }));
         debouncedSaveLayout(allLayouts);
     };
 

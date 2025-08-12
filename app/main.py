@@ -12,7 +12,7 @@ from .db import connect_to_mongo, close_mongo_connection, get_database
 from .users import User, UserRead, UserCreate, UserUpdate
 from .auth import auth_backend, fastapi_users
 from .scheduler import setup_scheduler, shutdown_scheduler
-from .api import characters, gemini, open5e, admin, users
+from .api import characters, gemini, open5e, admin
 
 ENCODERS_BY_TYPE[PydanticObjectId] = str
 ENCODERS_BY_TYPE[ObjectId] = str
@@ -58,7 +58,6 @@ app.include_router(characters.router, prefix="/api/characters", tags=["character
 app.include_router(gemini.router, prefix="/api/gemini", tags=["gemini"])
 app.include_router(open5e.router, prefix="/api/open5e", tags=["open5e"])
 app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
-app.include_router(users.router, prefix="/api/users", tags=["users"])
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):

@@ -74,3 +74,20 @@ async def delete_character(character_id: str, user: User = Depends(current_user)
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Character not found or you don't have permission to delete it")
     return Response(status_code=204)
+
+@router.put("/{character_id}/layout")
+async def update_character_layout(character_id: str, layout: dict, user: User = Depends(current_user)):
+    characters_collection = get_collection_characters()
+
+    existing_character = await characters_collection.find_one({"id": character_id, "user_id": user.id})
+    if existing_character is None:
+        raise HTTPException(status_code=404, detail="Character not found or you don't have permission to edit it.")
+
+    result = await characters_collection.update_one(
+        {"id": character_id, "user_id": user.id}, {"$set": {"layout": layout}}
+    )
+
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail=f"Character with id {character_id} not found.")
+
+    return {"message": "Layout updated successfully"}
