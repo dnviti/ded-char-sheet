@@ -27,6 +27,28 @@ const FullGeneratorModal = ({ isOpen, onClose, onGenerate, isLoading, status }) 
     );
 };
 
+const CreationChoiceModal = ({ isOpen, onClose, onAiCreate, onEmptyCreate }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+            <div className="theme-dnd-card p-8 w-full max-w-md relative border-4 border-accent-gold shadow-2xl text-center">
+                <button onClick={onClose} className="absolute top-2 right-4 text-parchment hover:text-accent-gold text-4xl font-title">&times;</button>
+                <h2 className="text-3xl font-title text-center mb-6">Create a New Hero</h2>
+                <p className="text-parchment mb-8">How would you like to begin your next adventure?</p>
+                <div className="flex flex-col gap-4">
+                    <button onClick={onAiCreate} className="theme-dnd-button text-lg py-3">
+                        <i className="fas fa-magic mr-2"></i> Generate with AI
+                    </button>
+                    <button onClick={onEmptyCreate} className="theme-dnd-button text-lg py-3">
+                        <i className="fas fa-scroll mr-2"></i> Start with an Empty Sheet
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const CharacterCard = ({ char, onSelect, onDelete }) => {
     const handleSelect = () => {
         window.location.href = `/character/sheet/${char.id}`;
@@ -55,6 +77,7 @@ const CharacterSelector = ({ characters, onSelect, onCreate, onDelete, onFullGen
     const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const [generationStatus, setGenerationStatus] = useState('');
+    const [isChoiceModalOpen, setIsChoiceModalOpen] = useState(false);
 
     const handleGenerate = async (prompt) => {
         setIsGenerating(true);
@@ -72,22 +95,34 @@ const CharacterSelector = ({ characters, onSelect, onCreate, onDelete, onFullGen
         }
     };
     
-    const openModal = () => {
+    const openAiModal = () => {
+        setIsChoiceModalOpen(false); // Close choice modal
         setIsGeneratorOpen(true);
         setIsGenerating(false);
         setGenerationStatus('');
     }
 
-    const closeModal = () => {
+    const closeAiModal = () => {
         if (isGenerating) return; // Don't close while generating
         setIsGeneratorOpen(false);
     }
 
+    const handleEmptyCreate = () => {
+        setIsChoiceModalOpen(false);
+        onCreate();
+    }
+
     return (
         <>
+            <CreationChoiceModal 
+                isOpen={isChoiceModalOpen}
+                onClose={() => setIsChoiceModalOpen(false)}
+                onAiCreate={openAiModal}
+                onEmptyCreate={handleEmptyCreate}
+            />
             <FullGeneratorModal 
                 isOpen={isGeneratorOpen} 
-                onClose={closeModal} 
+                onClose={closeAiModal} 
                 onGenerate={handleGenerate} 
                 isLoading={isGenerating}
                 status={generationStatus}
@@ -99,12 +134,9 @@ const CharacterSelector = ({ characters, onSelect, onCreate, onDelete, onFullGen
                     <p className="text-parchment">Choose your character or create a new legend.</p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row justify-center gap-4 mb-10">
-                    <button onClick={onCreate} className="theme-dnd-button text-lg flex-grow">
+                <div className="flex justify-center mb-10">
+                    <button onClick={() => setIsChoiceModalOpen(true)} className="theme-dnd-button text-xl">
                         + Create New Character
-                    </button>
-                    <button onClick={openModal} className="theme-dnd-button text-lg flex-grow">
-                        <i className="fas fa-magic mr-2"></i> Quick AI Creation
                     </button>
                 </div>
 
