@@ -81,7 +81,7 @@ function App() {
     };
 
     const geminiApiCall = (prompt, jsonSchema) => {
-        return callGeminiAPI(prompt, jsonSchema, () => refreshCurrentUser(setCurrentUser), setCurrentUser);
+        return callGeminiAPI(prompt, jsonSchema, refreshCurrentUser, setCurrentUser);
     }
 
     return (
