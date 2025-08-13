@@ -212,8 +212,8 @@ function App() {
                  throw new Error(errorData.detail);
             }
             const savedChar = await response.json();
-            setCharacters(prev => [...prev, savedChar]);
-            setSelectedCharacterId(savedChar.id);
+            // No need to update state, we are redirecting
+            window.location.href = `/character/sheet/${savedChar.id}`;
         } catch (error) {
             console.error("Failed to create character:", error);
         }
