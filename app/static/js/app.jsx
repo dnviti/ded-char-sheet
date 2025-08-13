@@ -62,7 +62,7 @@ function App() {
     const selectedCharacter = characters.find(c => c.id === selectedCharacterId);
     const isCharacterSheetPage = window.location.pathname.startsWith('/character/sheet/');
 
-    if (!authChecked) {
+    if (!authChecked || !currentUser) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center p-4">
                 <h1 className="text-4xl font-title">Loading the Tavern...</h1>
@@ -70,8 +70,6 @@ function App() {
         );
     }
 
-    const onLogin = (email, password) => handleLogin(email, password, setCurrentUser);
-    const onRegister = (email, password) => handleRegister(email, password, setCurrentUser);
     const onLogout = () => handleLogout(setCurrentUser, setSelectedCharacterId);
     const onDeleteCharacter = (id) => handleDeleteCharacter(id, selectedCharacterId, setSelectedCharacterId, setCharacters);
     const onUpdateCharacter = (character) => handleUpdateCharacter(character, setCharacters);
@@ -85,39 +83,33 @@ function App() {
     }
 
     return (
-        <>
-            {currentUser ? (
-                <div className="min-h-screen">
-                    <BurgerMenu currentUser={currentUser} onLogout={onLogout} />
-                    <header className="bg-wood-light border-b-4 border-theme p-4 flex justify-center items-center shadow-lg print:hidden relative">
-                        <div className="flex items-center">
-                            <h1 className="text-3xl font-title">Character Keep</h1>
-                            <span className="ml-4 text-xs bg-red-800 text-white font-bold px-2 py-1 rounded-full">v0.1.0 Alpha</span>
-                        </div>
-                        {currentUser.is_superuser && (
-                            <a href="/admin" className="theme-dnd-button absolute right-4">Admin</a>
-                        )}
-                    </header>
-                    <main className="p-4 md:p-8">
-                        {loading && !selectedCharacter ? (
-                             <div className="flex flex-col items-center justify-center p-4">
-                                <h1 className="text-4xl font-title">Loading Heroes...</h1>
-                            </div>
-                        ) : !selectedCharacterId || !isCharacterSheetPage ? (
-                            <CharacterSelector characters={characters} onSelect={handleSelectCharacter} onCreate={handleCreateCharacter} onDelete={onDeleteCharacter} onFullGenerate={onFullGenerate} />
-                        ) : selectedCharacter ? (
-                            <CharacterSheet user={currentUser} character={selectedCharacter} onUpdate={onUpdateCharacter} onBack={handleBackToSelector} callGeminiAPI={geminiApiCall} callImagenAPI={callImagenAPI} onUpdateLayout={handleUpdateCharacterLayout} />
-                        ) : (
-                            <div className="flex flex-col items-center justify-center p-4">
-                                <h1 className="text-4xl font-title">Loading Character...</h1>
-                            </div>
-                        )}
-                    </main>
+        <div className="min-h-screen">
+            <BurgerMenu currentUser={currentUser} onLogout={onLogout} />
+            <header className="bg-wood-light border-b-4 border-theme p-4 flex justify-center items-center shadow-lg print:hidden relative">
+                <div className="flex items-center">
+                    <h1 className="text-3xl font-title">Character Keep</h1>
+                    <span className="ml-4 text-xs bg-red-800 text-white font-bold px-2 py-1 rounded-full">v0.1.0 Alpha</span>
                 </div>
-            ) : (
-                <AuthForm onLogin={onLogin} onRegister={onRegister} registrationsEnabled={window.REGISTRATIONS_ENABLED} />
-            )}
-        </>
+                {currentUser.is_superuser && (
+                    <a href="/admin" className="theme-dnd-button absolute right-4">Admin</a>
+                )}
+            </header>
+            <main className="p-4 md:p-8">
+                {loading && !selectedCharacter ? (
+                     <div className="flex flex-col items-center justify-center p-4">
+                        <h1 className="text-4xl font-title">Loading Heroes...</h1>
+                    </div>
+                ) : !selectedCharacterId || !isCharacterSheetPage ? (
+                    <CharacterSelector characters={characters} onSelect={handleSelectCharacter} onCreate={handleCreateCharacter} onDelete={onDeleteCharacter} onFullGenerate={onFullGenerate} />
+                ) : selectedCharacter ? (
+                    <CharacterSheet user={currentUser} character={selectedCharacter} onUpdate={onUpdateCharacter} onBack={handleBackToSelector} callGeminiAPI={geminiApiCall} callImagenAPI={callImagenAPI} onUpdateLayout={handleUpdateCharacterLayout} />
+                ) : (
+                    <div className="flex flex-col items-center justify-center p-4">
+                        <h1 className="text-4xl font-title">Loading Character...</h1>
+                    </div>
+                )}
+            </main>
+        </div>
     );
 }
 

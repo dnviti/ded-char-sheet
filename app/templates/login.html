@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - D&D Character Sheet</title>
+    <link rel="icon" href="{{ url_for('static', path='favicon.ico') }}">
+
+    <!-- Tailwind CSS from CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=MedievalSharp&display=swap" rel="stylesheet">
+
+    <!-- React and ReactDOM from CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+
+    <!-- Babel for JSX transpilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/theme.css') }}">
+</head>
+<body class="theme-dnd">
+    <div id="root"></div>
+    <footer class="text-center text-xs text-stone-400 py-4 print:hidden">
+        <p>D&D Character Sheet based on open5e API</p>
+    </footer>
+
+    <script>
+        window.REGISTRATIONS_ENABLED = {{ REGISTRATIONS_ENABLED|tojson }};
+    </script>
+
+    <script type="text/babel" src="{{ url_for('static', path='/js/api/auth/login.js') }}"></script>
+    <script type="text/babel" src="{{ url_for('static', path='/js/api.js') }}"></script>
+    <script type="text/babel" src="{{ url_for('static', path='/js/components/AuthForm.jsx') }}"></script>
+    <script type="text/babel" src="{{ url_for('static', path='/js/login_app.jsx') }}"></script>
+</body>
+</html>
