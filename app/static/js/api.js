@@ -16,6 +16,7 @@ async function handleLogout(setCurrentUser, setSelectedCharacterId) {
     await fetch('/auth/jwt/logout', { method: 'POST' });
     setCurrentUser(null);
     setSelectedCharacterId(null);
+    window.location.href = '/login';
 };
 
 async function refreshCurrentUser(setCurrentUser) {
