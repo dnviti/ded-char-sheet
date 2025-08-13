@@ -73,6 +73,7 @@ function App() {
     const onLogout = () => handleLogout(setCurrentUser, setSelectedCharacterId);
     const onDeleteCharacter = (id) => handleDeleteCharacter(id, selectedCharacterId, setSelectedCharacterId, setCharacters);
     const onUpdateCharacter = (character) => handleUpdateCharacter(character, setCharacters);
+    const onCreateCharacter = () => handleCreateCharacter(setCharacters);
 
     const onFullGenerate = (concept, onProgress) => {
         return handleFullGenerateCharacter(concept, onProgress, setCharacters, setSelectedCharacterId, setCurrentUser);
@@ -100,7 +101,7 @@ function App() {
                         <h1 className="text-4xl font-title">Loading Heroes...</h1>
                     </div>
                 ) : !selectedCharacterId || !isCharacterSheetPage ? (
-                    <CharacterSelector characters={characters} onSelect={handleSelectCharacter} onCreate={handleCreateCharacter} onDelete={onDeleteCharacter} onFullGenerate={onFullGenerate} />
+                    <CharacterSelector characters={characters} onSelect={handleSelectCharacter} onCreate={onCreateCharacter} onDelete={onDeleteCharacter} onFullGenerate={onFullGenerate} />
                 ) : selectedCharacter ? (
                     <CharacterSheet user={currentUser} character={selectedCharacter} onUpdate={onUpdateCharacter} onBack={handleBackToSelector} callGeminiAPI={geminiApiCall} callImagenAPI={callImagenAPI} onUpdateLayout={handleUpdateCharacterLayout} />
                 ) : (

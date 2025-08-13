@@ -46,9 +46,9 @@
         window.USER = {{ user.model_dump_json()|safe if user else 'null' }};
     </script>
 
-    <script type="text/babel" src="{{ url_for('static', path='/js/constants.js') }}"></script>
-    <script type="text/babel" src="{{ url_for('static', path='/js/api/auth/login.js') }}"></script>
-    <script type="text/babel" src="{{ url_for('static', path='/js/api.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', path='/js/constants.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', path='/js/api/auth/login.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', path='/js/api.js') }}"></script>
     <script type="text/babel" src="{{ url_for('static', path='/js/components/UI.jsx') }}"></script>
     <script type="text/babel" src="{{ url_for('static', path='/js/components/CharacterSheet.utils.js') }}"></script>
     <script type="text/babel" src="{{ url_for('static', path='/js/components/CharacterSheetSections.jsx') }}"></script>

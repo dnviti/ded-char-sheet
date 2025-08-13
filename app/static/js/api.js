@@ -80,22 +80,21 @@ async function callImagenAPI(prompt) {
     }
 };
 
-async function handleCreateCharacter() {
-    const newChar = createNewCharacter();
+async function handleCreateCharacter(setCharacters) {
     try {
         const response = await fetch('/api/characters', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newChar),
+            body: JSON.stringify({}), // Backend will use default name
         });
         if (!response.ok) {
              const errorData = await response.json();
-             alert(`Failed to create character: ${errorData.detail}`);
-             throw new Error(errorData.detail);
+             const errorMessage = errorData.detail || "Failed to create character";
+             alert(`Error: ${errorMessage}`);
+             throw new Error(errorMessage);
         }
-        const savedChar = await response.json();
-        // No need to update state, we are redirecting
-        window.location.href = `/character/sheet/${savedChar.id}`;
+        const newCharacter = await response.json();
+        setCharacters(prev => [...prev, newCharacter]);
     } catch (error) {
         console.error("Failed to create character:", error);
     }
@@ -174,7 +173,7 @@ async function handleFullGenerateCharacter(concept, onProgress, setCharacters, s
         const newChar = {
             ...createNewCharacter(),
             ...parsedData,
-            id: crypto.randomUUID(), // Ensure a new ID is generated
+            id: uuidv4(), // Ensure a new ID is generated
         };
 
         // Generate portrait
