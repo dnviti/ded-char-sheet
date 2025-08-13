@@ -63,8 +63,22 @@ app.include_router(gemini.router, prefix="/api/gemini", tags=["gemini"])
 app.include_router(open5e.router, prefix="/api/open5e", tags=["open5e"])
 app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
 
+@app.get("/login", response_class=HTMLResponse)
+async def route_login(request: Request, user: User = Depends(fastapi_users.current_user(optional=True))):
+    if user:
+        return RedirectResponse(url="/")
+    return templates.TemplateResponse(
+        "login.html",
+        {
+            "request": request,
+            "REGISTRATIONS_ENABLED": REGISTRATIONS_ENABLED,
+        },
+    )
+
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request, user: User = Depends(fastapi_users.current_user(optional=True))):
+    if not user:
+        return RedirectResponse(url="/login")
     return templates.TemplateResponse(
         "index.html",
         {
@@ -82,6 +96,8 @@ async def redirect_to_root():
 
 @app.get("/character/sheet/{character_id}", response_class=HTMLResponse)
 async def read_character_sheet(request: Request, character_id: str, user: User = Depends(fastapi_users.current_user(optional=True))):
+    if not user:
+        return RedirectResponse(url="/login")
     return templates.TemplateResponse(
         "character_sheet.html",
         {
